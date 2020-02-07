@@ -5,7 +5,7 @@ import (
 )
 
 func main() {
-	h := clbd.NewStatsHandler()
+	h := clbd.NewPingHandler()
 
 	ep := clbd.NewAPIEndPoint()
 	ep.AddHandler("/ping", "post", h)
