@@ -14,7 +14,7 @@ type PingHandler struct {
 func NewPingHandler() *PingHandler {
 	ph := new(PingHandler)
 	ph.urn = "ping"
-	ph.methods = []string{"POST"}
+	ph.methods = []string{POST}
 
 	return ph
 }
