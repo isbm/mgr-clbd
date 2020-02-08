@@ -3,6 +3,7 @@ package clbd
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"log"
 	"path"
 	"strings"
 )
@@ -17,13 +18,15 @@ type APIEndPoint struct {
 	server *gin.Engine
 	root   string
 	port   int
+	dbx    *Dbx
 }
 
-func NewAPIEndPoint(root string) *APIEndPoint {
+func NewAPIEndPoint(root string, dbx *Dbx) *APIEndPoint {
 	api := new(APIEndPoint)
 	api.root = "/" + strings.Trim(root, "/")
 	api.server = gin.Default()
 	api.port = 8080
+	api.dbx = dbx
 
 	return api
 }
@@ -47,10 +50,12 @@ func (api *APIEndPoint) AddHandler(handler Handler) *APIEndPoint {
 			api.server.GET(urn, handler.Handle)
 		case POST:
 			api.server.POST(urn, handler.Handle)
-		case ANY:
+		default:
 			api.server.Any(urn, handler.Handle)
 		}
 	}
+	handler.SetDbx(api.dbx)
+	log.Println("Added handler at", urn)
 	return api
 }
 

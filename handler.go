@@ -13,4 +13,7 @@ type Handler interface {
 
 	// Methods returns available methods that this handler supposed to handle
 	Methods() []string
+
+	// Set Dbx object to cross-access the database calls
+	SetDbx(dbx *Dbx)
 }
