@@ -6,35 +6,31 @@ import (
 )
 
 type NodeHandler struct {
-	urn     string
-	methods []string
-	dbx     *Dbx
+	dbx *Dbx
 }
 
 func NewNodeHandler() *NodeHandler {
-	ph := new(NodeHandler)
-	ph.urn = "nodes"
-	ph.methods = []string{POST, GET}
-
-	return ph
+	return new(NodeHandler)
 }
 
-// URN returns uniform resource name of the handler to be installed at.
-func (ph *NodeHandler) URN() string {
-	return ph.urn
-}
-
-// Methods returns available methods that this handler supposed to handle
-func (ph *NodeHandler) Methods() []string {
-	return ph.methods
-}
-
+// SetDbx sets the Dbx instance pointer
 func (ph *NodeHandler) SetDbx(dbx *Dbx) {
 	ph.dbx = dbx
 }
 
+// Handlers returns a map of supported handlers and their configuration
+func (nh *NodeHandler) Handlers() []*HandlerMeta {
+	return []*HandlerMeta{
+		&HandlerMeta{
+			Route:   "nodes",
+			Handle:  nh.OnNodes,
+			Methods: []string{POST, GET},
+		},
+	}
+}
+
 // Handle implements the entry point of the handler
-func (ph *NodeHandler) Handle(ctx *gin.Context) {
+func (nh *NodeHandler) OnNodes(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{
 		"foo": "bar",
 	})

@@ -4,15 +4,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type HandlerMeta struct {
+	Route   string
+	Handle  gin.HandlerFunc
+	Methods []string
+}
+
 type Handler interface {
-	// Handle implements the entry point of the handler
-	Handle(ctx *gin.Context)
-
-	// URN returns uniform resource name of the handler to be installed at.
-	URN() string
-
-	// Methods returns available methods that this handler supposed to handle
-	Methods() []string
+	// Route map
+	Handlers() []*HandlerMeta
 
 	// Set Dbx object to cross-access the database calls
 	SetDbx(dbx *Dbx)
