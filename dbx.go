@@ -41,7 +41,7 @@ func (dbx *Dbx) SetDBHost(fqdn string) *Dbx {
 }
 
 // SetPort sets the connection port of the remote database URI
-func (dbx *Dbx) SetPort(port int) *Dbx {
+func (dbx *Dbx) SetDBPort(port int) *Dbx {
 	dbx._port = port
 	return dbx
 }
@@ -66,6 +66,9 @@ func (dbx *Dbx) Open() error {
 	var err error
 	uri := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", dbx._user, dbx._password, dbx._host, dbx._port, dbx._dbname)
 	dbx.db, err = gorm.Open("mysql", uri)
+	if err == nil {
+		dbx.db.DB().SetMaxIdleConns(50)
+	}
 	return err
 }
 
