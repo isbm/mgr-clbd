@@ -29,6 +29,11 @@ func (ph *PingHandler) Methods() []string {
 	return ph.methods
 }
 
+// SetDbx implements interface method to set a Dbx instance. Unused in this case.
+func (ph *PingHandler) SetDbx(dbx *Dbx) {
+
+}
+
 // Handle implements the entry point of the handler
 func (ph *PingHandler) Handle(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{
