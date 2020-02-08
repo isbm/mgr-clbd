@@ -11,11 +11,12 @@ import (
 )
 
 type APIEndPoint struct {
-	server *gin.Engine
-	root   string
-	port   int
-	db     *dbx.Dbx
-	mw     *Middleware
+	server   *gin.Engine
+	root     string
+	port     int
+	db       *dbx.Dbx
+	mw       *Middleware
+	handlers []hdl.Handler
 }
 
 func NewAPIEndPoint(root string, db *dbx.Dbx) *APIEndPoint {
@@ -24,6 +25,7 @@ func NewAPIEndPoint(root string, db *dbx.Dbx) *APIEndPoint {
 	api.server = gin.Default()
 	api.port = 8080
 	api.db = db
+	api.handlers = make([]hdl.Handler, 0)
 
 	// Setup middleware
 	api.mw = NewMiddleware(api.root)
@@ -47,6 +49,7 @@ func (api *APIEndPoint) getFullURN(urn string) string {
 // Add handler to the server with all declared API endpoints
 func (api *APIEndPoint) AddHandler(handler hdl.Handler) *APIEndPoint {
 	handler.SetDbx(api.db)
+	api.handlers = append(api.handlers, handler)
 	for _, hmeta := range handler.Handlers() {
 		urn := api.getFullURN(hmeta.Route)
 		for _, method := range hmeta.Methods {
@@ -64,8 +67,23 @@ func (api *APIEndPoint) AddHandler(handler hdl.Handler) *APIEndPoint {
 	return api
 }
 
+func (api *APIEndPoint) BootDb() {
+	for _, handler := range api.handlers {
+		backend := handler.Backend()
+		if backend != nil {
+			backend.StartUp()
+		}
+	}
+}
+
 func (api *APIEndPoint) Start() {
-	err := api.server.Run(fmt.Sprintf(":%d", api.port))
+	err := api.db.Open()
+	if err != nil {
+		panic(err)
+	}
+	defer api.db.Close()
+	api.BootDb()
+	err = api.server.Run(fmt.Sprintf(":%d", api.port))
 	if err != nil {
 		panic(err)
 	}
