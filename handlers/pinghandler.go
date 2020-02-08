@@ -2,6 +2,7 @@ package hdl
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/isbm/mgr-clbd/backend"
 	"github.com/isbm/mgr-clbd/dbx"
 	"net/http"
 	"time"
@@ -12,6 +13,10 @@ type PingHandler struct{}
 func NewPingHandler() *PingHandler {
 	ph := new(PingHandler)
 	return ph
+}
+
+func (ph *PingHandler) Backend() backend.Backend {
+	return nil
 }
 
 // SetDbx implements interface method to set a Dbx instance. Unused in this case.

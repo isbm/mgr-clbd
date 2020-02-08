@@ -4,6 +4,7 @@ package hdl
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/isbm/mgr-clbd/backend"
 	"github.com/isbm/mgr-clbd/dbx"
 )
 
@@ -20,6 +21,9 @@ type HandlerMeta struct {
 }
 
 type Handler interface {
+	// Return underlying backend
+	Backend() backend.Backend
+
 	// Route map
 	Handlers() []*HandlerMeta
 

@@ -2,6 +2,7 @@ package hdl
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/isbm/mgr-clbd/backend"
 	"github.com/isbm/mgr-clbd/dbx"
 	"net/http"
 )
@@ -12,6 +13,11 @@ type SystemsHandler struct {
 
 func NewSystemsHandler() *SystemsHandler {
 	return new(SystemsHandler)
+}
+
+// Backend returns an underlying backend interface
+func (ph *SystemsHandler) Backend() backend.Backend {
+	return nil
 }
 
 // SetDbx sets the Dbx instance pointer
