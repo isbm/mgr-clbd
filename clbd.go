@@ -3,6 +3,7 @@ package clbd
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/isbm/mgr-clbd/dbx"
 	"log"
 	"path"
 	"strings"
@@ -18,16 +19,16 @@ type APIEndPoint struct {
 	server *gin.Engine
 	root   string
 	port   int
-	dbx    *Dbx
+	db     *dbx.Dbx
 	mw     *Middleware
 }
 
-func NewAPIEndPoint(root string, dbx *Dbx) *APIEndPoint {
+func NewAPIEndPoint(root string, db *dbx.Dbx) *APIEndPoint {
 	api := new(APIEndPoint)
 	api.root = "/" + strings.Trim(root, "/")
 	api.server = gin.Default()
 	api.port = 8080
-	api.dbx = dbx
+	api.db = db
 
 	// Setup middleware
 	api.mw = NewMiddleware(api.root)
@@ -50,7 +51,7 @@ func (api *APIEndPoint) getFullURN(urn string) string {
 
 // Add handler to the server with all declared API endpoints
 func (api *APIEndPoint) AddHandler(handler Handler) *APIEndPoint {
-	handler.SetDbx(api.dbx)
+	handler.SetDbx(api.db)
 	for _, hmeta := range handler.Handlers() {
 		urn := api.getFullURN(hmeta.Route)
 		for _, method := range hmeta.Methods {

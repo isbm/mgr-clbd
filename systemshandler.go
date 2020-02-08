@@ -2,11 +2,12 @@ package clbd
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/isbm/mgr-clbd/dbx"
 	"net/http"
 )
 
 type SystemsHandler struct {
-	dbx *Dbx
+	db *dbx.Dbx
 }
 
 func NewSystemsHandler() *SystemsHandler {
@@ -14,8 +15,8 @@ func NewSystemsHandler() *SystemsHandler {
 }
 
 // SetDbx sets the Dbx instance pointer
-func (sh *SystemsHandler) SetDbx(dbx *Dbx) {
-	sh.dbx = dbx
+func (sh *SystemsHandler) SetDbx(db *dbx.Dbx) {
+	sh.db = db
 }
 
 // Handlers returns a map of supported handlers and their configuration

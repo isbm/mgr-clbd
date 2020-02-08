@@ -2,6 +2,7 @@ package clbd
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/isbm/mgr-clbd/dbx"
 	"net/http"
 	"time"
 )
@@ -14,7 +15,7 @@ func NewPingHandler() *PingHandler {
 }
 
 // SetDbx implements interface method to set a Dbx instance. Unused in this case.
-func (ph *PingHandler) SetDbx(dbx *Dbx) {}
+func (ph *PingHandler) SetDbx(db *dbx.Dbx) {}
 
 // Handlers returns a map of supported handlers and their configuration
 func (ph *PingHandler) Handlers() []*HandlerMeta {

@@ -2,6 +2,7 @@ package clbd
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/isbm/mgr-clbd/dbx"
 )
 
 type HandlerMeta struct {
@@ -15,5 +16,5 @@ type Handler interface {
 	Handlers() []*HandlerMeta
 
 	// Set Dbx object to cross-access the database calls
-	SetDbx(dbx *Dbx)
+	SetDbx(db *dbx.Dbx)
 }

@@ -2,20 +2,25 @@ package clbd
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/isbm/mgr-clbd/backend"
+	"github.com/isbm/mgr-clbd/dbx"
 	"net/http"
 )
 
 type NodeHandler struct {
-	dbx *Dbx
+	db       *dbx.Dbx
+	bknNodes *backend.Nodes
 }
 
 func NewNodeHandler() *NodeHandler {
-	return new(NodeHandler)
+	nh := new(NodeHandler)
+	nh.bknNodes = backend.NewNodes(nh.db)
+	return nh
 }
 
 // SetDbx sets the Dbx instance pointer
-func (ph *NodeHandler) SetDbx(dbx *Dbx) {
-	ph.dbx = dbx
+func (ph *NodeHandler) SetDbx(db *dbx.Dbx) {
+	ph.db = db
 }
 
 // Handlers returns a map of supported handlers and their configuration
