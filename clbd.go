@@ -19,6 +19,7 @@ type APIEndPoint struct {
 	root   string
 	port   int
 	dbx    *Dbx
+	mw     *Middleware
 }
 
 func NewAPIEndPoint(root string, dbx *Dbx) *APIEndPoint {
@@ -27,6 +28,12 @@ func NewAPIEndPoint(root string, dbx *Dbx) *APIEndPoint {
 	api.server = gin.Default()
 	api.port = 8080
 	api.dbx = dbx
+
+	// Setup middleware
+	api.mw = NewMiddleware(api.root)
+	for _, method := range api.mw.Methods {
+		api.server.Use(method)
+	}
 
 	return api
 }
