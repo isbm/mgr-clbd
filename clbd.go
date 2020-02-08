@@ -43,6 +43,7 @@ func (api *APIEndPoint) getFullURN(urn string) string {
 
 // Add handler to the server with all declared API endpoints
 func (api *APIEndPoint) AddHandler(handler Handler) *APIEndPoint {
+	handler.SetDbx(api.dbx)
 	for _, hmeta := range handler.Handlers() {
 		urn := api.getFullURN(hmeta.Route)
 		for _, method := range hmeta.Methods {
@@ -55,7 +56,6 @@ func (api *APIEndPoint) AddHandler(handler Handler) *APIEndPoint {
 				api.server.Any(urn, hmeta.Handle)
 			}
 		}
-		handler.SetDbx(api.dbx)
 		log.Println("Added handler at", urn)
 	}
 	return api
