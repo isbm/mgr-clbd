@@ -1,3 +1,5 @@
+// Handler interface
+
 package hdl
 
 import (
