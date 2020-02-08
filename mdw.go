@@ -3,8 +3,8 @@
 package clbd
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 type Middleware struct {
@@ -25,7 +25,16 @@ func (m *Middleware) _getMethodName(fullpath string) string {
 	return fullpath[len(m.root):]
 }
 
+// MW_CheckToken provides an example of token verification
 func (m *Middleware) MW_CheckToken(ctx *gin.Context) {
-	fmt.Println("CHECK TOKEN>>", m._getMethodName(ctx.FullPath()))
-	ctx.Next()
+	if m._getMethodName(ctx.FullPath()) == "/ping" {
+		ctx.Next()
+	} else {
+		token := ctx.Request.FormValue("token")
+		if token == "0" { // Dummy token "0" means "admin"
+			ctx.Next()
+		} else {
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorised access"})
+		}
+	}
 }
