@@ -18,6 +18,7 @@ func main() {
 	ep := clbd.NewAPIEndPoint("/api/v1", dbx).
 		SetPort(cfg.Find("api").Int("port", "")).
 		AddHandler(clbd.NewPingHandler()).
-		AddHandler(clbd.NewNodeHandler())
+		AddHandler(clbd.NewNodeHandler()).
+		AddHandler(clbd.NewSystemsHandler())
 	ep.Start()
 }
