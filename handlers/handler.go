@@ -1,8 +1,14 @@
-package clbd
+package hdl
 
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/isbm/mgr-clbd/dbx"
+)
+
+const (
+	ANY  = "any"
+	POST = "post"
+	GET  = "get"
 )
 
 type HandlerMeta struct {

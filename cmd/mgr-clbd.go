@@ -4,6 +4,7 @@ import (
 	"github.com/isbm/go-nanoconf"
 	"github.com/isbm/mgr-clbd"
 	"github.com/isbm/mgr-clbd/dbx"
+	"github.com/isbm/mgr-clbd/handlers"
 )
 
 func main() {
@@ -18,8 +19,8 @@ func main() {
 
 	ep := clbd.NewAPIEndPoint("/api/v1", db).
 		SetPort(cfg.Find("api").Int("port", "")).
-		AddHandler(clbd.NewPingHandler()).
-		AddHandler(clbd.NewNodeHandler()).
-		AddHandler(clbd.NewSystemsHandler())
+		AddHandler(hdl.NewPingHandler()).
+		AddHandler(hdl.NewNodeHandler()).
+		AddHandler(hdl.NewSystemsHandler())
 	ep.Start()
 }

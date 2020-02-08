@@ -1,4 +1,4 @@
-package clbd
+package hdl
 
 import (
 	"github.com/gin-gonic/gin"

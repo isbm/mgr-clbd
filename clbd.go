@@ -4,15 +4,10 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/isbm/mgr-clbd/dbx"
+	"github.com/isbm/mgr-clbd/handlers"
 	"log"
 	"path"
 	"strings"
-)
-
-const (
-	ANY  = "any"
-	POST = "post"
-	GET  = "get"
 )
 
 type APIEndPoint struct {
@@ -50,15 +45,15 @@ func (api *APIEndPoint) getFullURN(urn string) string {
 }
 
 // Add handler to the server with all declared API endpoints
-func (api *APIEndPoint) AddHandler(handler Handler) *APIEndPoint {
+func (api *APIEndPoint) AddHandler(handler hdl.Handler) *APIEndPoint {
 	handler.SetDbx(api.db)
 	for _, hmeta := range handler.Handlers() {
 		urn := api.getFullURN(hmeta.Route)
 		for _, method := range hmeta.Methods {
 			switch method {
-			case GET:
+			case hdl.GET:
 				api.server.GET(urn, hmeta.Handle)
-			case POST:
+			case hdl.POST:
 				api.server.POST(urn, hmeta.Handle)
 			default:
 				api.server.Any(urn, hmeta.Handle)
