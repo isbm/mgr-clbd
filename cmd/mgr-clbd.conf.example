@@ -1,0 +1,12 @@
+db:
+  name: mygreatdb
+  user: johnsmith
+  password: p@55w0rD
+  port: 3306
+  fqdn: mydb.somehost.org
+
+api:
+  port: 9080
+
+webui:
+  port: 9090
