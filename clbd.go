@@ -5,9 +5,14 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/isbm/mgr-clbd/dbx"
 	"github.com/isbm/mgr-clbd/handlers"
-	"log"
+	"github.com/isbm/mgr-clbd/utils"
+	"github.com/logrusorgru/aurora"
+	"github.com/sirupsen/logrus"
+	"net/http"
+	"os"
 	"path"
 	"strings"
+	"time"
 )
 
 type APIEndPoint struct {
@@ -17,15 +22,23 @@ type APIEndPoint struct {
 	db       *dbx.Dbx
 	mw       *Middleware
 	handlers []hdl.Handler
+	logger   *logrus.Logger
 }
 
 func NewAPIEndPoint(root string, db *dbx.Dbx) *APIEndPoint {
 	api := new(APIEndPoint)
+	api.logger = utils.GetTextLogger(logrus.DebugLevel, nil)
 	api.root = "/" + strings.Trim(root, "/")
-	api.server = gin.Default()
 	api.port = 8080
 	api.db = db
 	api.handlers = make([]hdl.Handler, 0)
+
+	// Setup server
+	api.server = gin.New()
+	gin.SetMode(gin.ReleaseMode)
+	api.server.Use(gin.Recovery())
+	api.server.Use(api.GinLogger())
+	//api.server.Use(ginrus.Ginrus(logrus.StandardLogger(), time.RFC3339, true))
 
 	// Setup middleware
 	api.mw = NewMiddleware(api.root)
@@ -34,6 +47,63 @@ func NewAPIEndPoint(root string, db *dbx.Dbx) *APIEndPoint {
 	}
 
 	return api
+}
+
+// GinLogger makes a custom logger via logrus
+func (api *APIEndPoint) GinLogger() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Start timer
+		start := time.Now()
+		path := c.Request.URL.Path
+		raw := c.Request.URL.RawQuery
+
+		// Process request
+		c.Next()
+
+		// Stop timer
+		timestamp := time.Now()
+		latency := timestamp.Sub(start)
+
+		errmsg := c.Errors.ByType(gin.ErrorTypePrivate).String()
+		if errmsg != "" {
+			errmsg = " " + errmsg
+		}
+
+		bodySize := c.Writer.Size()
+
+		if raw != "" {
+			path = path + "?" + raw
+		}
+
+		// Color methods
+		var method string
+		if api.logger.Out == os.Stderr {
+			switch c.Request.Method {
+			case "POST":
+				method = aurora.Bold(aurora.BrightGreen("POST")).String()
+			case "GET":
+				method = aurora.Bold(aurora.BrightYellow("GET")).String()
+			case "DELETE":
+				method = aurora.Bold(aurora.BrightRed("GET")).String()
+			default:
+				method = aurora.Bold(aurora.BrightMagenta(c.Request.Method)).String()
+			}
+		} else {
+			method = c.Request.Method
+		}
+
+		msg := fmt.Sprintf("%s (%s) %s - %s%s (latency: %s; size: %d)",
+			method, c.ClientIP(), c.Request.Host, path, errmsg, latency, bodySize)
+		if c.Writer.Status() != http.StatusOK || errmsg != "" {
+			if errmsg != "" {
+				api.logger.Errorln(msg)
+			} else {
+				api.logger.Warningln(msg)
+			}
+		} else {
+			api.logger.Infoln(msg)
+		}
+	}
 }
 
 func (api *APIEndPoint) SetPort(port int) *APIEndPoint {
@@ -62,7 +132,7 @@ func (api *APIEndPoint) AddHandler(handler hdl.Handler) *APIEndPoint {
 				api.server.Any(urn, hmeta.Handle)
 			}
 		}
-		log.Println("Added handler at", urn)
+		api.logger.Debugln("Added handler at", urn)
 	}
 	return api
 }
