@@ -8,12 +8,14 @@ import (
 )
 
 type NodeHandler struct {
+	BaseHandler
 	db       *dbx.Dbx
 	bknNodes *backend.Nodes
 }
 
-func NewNodeHandler() *NodeHandler {
+func NewNodeHandler(root string) *NodeHandler {
 	nh := new(NodeHandler)
+	nh.PrepareRoot(root)
 	nh.bknNodes = backend.NewNodesBackend()
 	return nh
 }
@@ -32,12 +34,12 @@ func (nh *NodeHandler) SetDbx(db *dbx.Dbx) {
 func (nh *NodeHandler) Handlers() []*HandlerMeta {
 	return []*HandlerMeta{
 		&HandlerMeta{
-			Route:   "nodes/list",
+			Route:   nh.ToRoute("list"),
 			Handle:  nh.OnListNodes,
 			Methods: []string{POST, GET},
 		},
 		&HandlerMeta{
-			Route:   "nodes/add",
+			Route:   nh.ToRoute("add"),
 			Handle:  nh.OnAddNode,
 			Methods: []string{POST},
 		},
@@ -46,7 +48,7 @@ func (nh *NodeHandler) Handlers() []*HandlerMeta {
 
 // Handle implements the entry point of the handler
 func (nh *NodeHandler) OnListNodes(ctx *gin.Context) {
-	nh.bknNodes.ListNodes()
+	nh.bknNodes.ListAllNodes()
 	ctx.JSON(http.StatusOK, gin.H{
 		"nodes": "listed",
 	})

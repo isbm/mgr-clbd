@@ -32,9 +32,10 @@ func run(ctx *cli.Context) error {
 	}
 	ep := clbd.NewAPIEndPoint("/api/v1", db).
 		SetPort(cfg.Find("api").DefaultInt("port", cmdPort, 8080)).
-		AddHandler(hdl.NewPingHandler()).
-		AddHandler(hdl.NewNodeHandler()).
-		AddHandler(hdl.NewSystemsHandler())
+		AddHandler(hdl.NewPingHandler("cluster")).
+		AddHandler(hdl.NewNodeHandler("nodes")).
+		AddHandler(hdl.NewSystemsHandler("systems")).
+		AddHandler(hdl.NewZoneHandler("zones"))
 
 	ep.Start()
 

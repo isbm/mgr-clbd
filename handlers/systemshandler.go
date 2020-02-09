@@ -8,11 +8,14 @@ import (
 )
 
 type SystemsHandler struct {
+	BaseHandler
 	db *dbx.Dbx
 }
 
-func NewSystemsHandler() *SystemsHandler {
-	return new(SystemsHandler)
+func NewSystemsHandler(root string) *SystemsHandler {
+	sh := new(SystemsHandler)
+	sh.PrepareRoot(root)
+	return sh
 }
 
 // Backend returns an underlying backend interface
@@ -29,15 +32,15 @@ func (sh *SystemsHandler) SetDbx(db *dbx.Dbx) {
 func (nh *SystemsHandler) Handlers() []*HandlerMeta {
 	return []*HandlerMeta{
 		&HandlerMeta{
-			Route:   "systems",
-			Handle:  nh.OnSystems,
+			Route:   nh.ToRoute("list"),
+			Handle:  nh.ListSystems,
 			Methods: []string{POST, GET},
 		},
 	}
 }
 
 // Handle implements the entry point of the handler
-func (nh *SystemsHandler) OnSystems(ctx *gin.Context) {
+func (nh *SystemsHandler) ListSystems(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{
 		"foo": "bar",
 	})

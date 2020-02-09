@@ -21,6 +21,9 @@ type HandlerMeta struct {
 }
 
 type Handler interface {
+	// Return root URI
+	URI() string
+
 	// Return underlying backend
 	Backend() backend.Backend
 

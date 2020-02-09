@@ -8,13 +8,18 @@ import (
 	"time"
 )
 
-type PingHandler struct{}
+type PingHandler struct {
+	BaseHandler
+}
 
-func NewPingHandler() *PingHandler {
+func NewPingHandler(root string) *PingHandler {
 	ph := new(PingHandler)
+	ph.PrepareRoot(root)
 	return ph
 }
 
+// Backend returns the backend instance for this API endpoint.
+// Pinger has none and returns just `nil`.
 func (ph *PingHandler) Backend() backend.Backend {
 	return nil
 }
@@ -26,7 +31,7 @@ func (ph *PingHandler) SetDbx(db *dbx.Dbx) {}
 func (ph *PingHandler) Handlers() []*HandlerMeta {
 	return []*HandlerMeta{
 		&HandlerMeta{
-			Route:   "ping",
+			Route:   ph.ToRoute("ping"),
 			Handle:  ph.OnPing,
 			Methods: []string{ANY},
 		},
