@@ -22,7 +22,6 @@ const (
 
 type ClusterZone struct {
 	gorm.Model
-	ID           int64
 	Name         string
 	Description  string
 	ClusterNodes []ClusterNode `gorm:"foreignkey:ZoneID"`
