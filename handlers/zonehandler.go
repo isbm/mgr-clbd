@@ -36,7 +36,35 @@ func (zh *ZoneHandler) Handlers() []*HandlerMeta {
 			Handle:  zh.ListZones,
 			Methods: []string{POST, GET},
 		},
+		&HandlerMeta{
+			Route:   zh.ToRoute("add"),
+			Handle:  zh.AddZone,
+			Methods: []string{POST},
+		},
+		&HandlerMeta{
+			Route:   zh.ToRoute("remove"),
+			Handle:  zh.RemoveZone,
+			Methods: []string{POST}, // XXX: Probably should be DELETE instead
+		},
+		&HandlerMeta{
+			Route:   zh.ToRoute("update"),
+			Handle:  zh.UpdateZone,
+			Methods: []string{POST},
+		},
 	}
+}
+
+// AddZone creates a zone in the cluster
+func (zh *ZoneHandler) AddZone(ctx *gin.Context) {
+}
+
+// UpdateZone updates a zone data
+func (zh *ZoneHandler) UpdateZone(ctx *gin.Context) {
+}
+
+// RemoveZone removes a zone from the cluster, but only if it is
+// empty (no nodes assigned to it).
+func (zh *ZoneHandler) RemoveZone(ctx *gin.Context) {
 }
 
 // Handle implements the entry point of the handler
