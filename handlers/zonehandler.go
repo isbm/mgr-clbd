@@ -9,23 +9,26 @@ import (
 
 type ZoneHandler struct {
 	BaseHandler
-	db *dbx.Dbx
+	db  *dbx.Dbx
+	bnd *backend.Zones
 }
 
 func NewZoneHandler(root string) *ZoneHandler {
 	zh := new(ZoneHandler)
+	zh.bnd = backend.NewZonesBackend()
 	zh.PrepareRoot(root)
 	return zh
 }
 
 // Backend returns an underlying backend interface
-func (ph *ZoneHandler) Backend() backend.Backend {
-	return nil
+func (zh *ZoneHandler) Backend() backend.Backend {
+	return zh.bnd
 }
 
 // SetDbx sets the Dbx instance pointer
 func (sh *ZoneHandler) SetDbx(db *dbx.Dbx) {
 	sh.db = db
+	sh.bnd.SetDbx(sh.db)
 }
 
 // Handlers returns a map of supported handlers and their configuration
