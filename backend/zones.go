@@ -36,10 +36,40 @@ func (z *Zones) CreateZone(name string, descr string) error {
 	return err
 }
 
+// ListZones lists available zones
+func (z *Zones) ListZones() []ClusterZone {
+	zones := []ClusterZone{}
+	z.db.DB().Find(&zones)
+	return zones
+}
+
 // RemoveZone removes an empty zone. If zone still contains nodes,
 // it won't be removed, but error will be issued.
 func (z *Zones) RemoveZone(name string) error {
 	var err error
+
+	zone := &ClusterZone{}
+	z.db.DB().Where("name = ?", name).First(&zone)
+	if zone.ID == 0 && zone.Name == "" {
+		err = fmt.Errorf("Zone %s was not found", name)
+		logger.Errorln(err.Error())
+		return err
+	}
+
+	nodes := make([]ClusterNode, 0)
+	z.db.DB().Where("name = ?", name).Find(&nodes)
+	if len(nodes) != 0 {
+		nodes = nil
+		err = fmt.Errorf("Zone still contains %d nodes", len(nodes))
+		logger.Errorf("Attempt to delete non-empty zone '%s'", name)
+		return err
+	}
+
+	if err := z.db.DB().Where("name = ?", name).Delete(&ClusterZone{}).Error; err != nil {
+		logger.Errorf("Error deleting node %s: %s", name, err.Error())
+	} else {
+		logger.Infof("Node %s has been deleted", name)
+	}
 
 	return err
 }
