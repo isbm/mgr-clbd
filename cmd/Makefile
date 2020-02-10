@@ -37,7 +37,9 @@ flush-cache:
 	$(GO) clean -cache -modcache -i -r
 
 swagger:
+ifeq (, $(shell which swag))
 	$(GO) get -u github.com/swaggo/swag/cmd/swag
+endif
 	cd ..;swag init -g cmd/mgr-clbd.go -o ./docs
 
 .PHONY: all install clean
