@@ -22,7 +22,7 @@ const (
 
 type ClusterZone struct {
 	ID          int64
-	Name        string
+	Name        string `gorm:"type:varchar(100);index;unique"`
 	Description string
 }
 
