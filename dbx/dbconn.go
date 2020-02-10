@@ -3,6 +3,7 @@ package dbx
 import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/isbm/mgr-clbd/utils"
 	"github.com/jinzhu/gorm"
 )
 
@@ -68,6 +69,8 @@ func (d *Dbx) Open() error {
 	uri := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", d._user, d._password, d._host, d._port, d._dbname)
 	d.db, err = gorm.Open("mysql", uri)
 	if err == nil {
+		d.db.SetLogger(utils.NewGormLogger(nil))
+		d.db.LogMode(true)
 		d.db.DB().SetMaxIdleConns(50)
 	}
 	return err

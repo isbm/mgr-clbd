@@ -29,3 +29,31 @@ func GetTextLogger(level logrus.Level, out *os.File) *logrus.Logger {
 
 	return logger
 }
+
+type GormLogger struct {
+	lgr *logrus.Logger
+}
+
+func NewGormLogger(lg *logrus.Logger) *GormLogger {
+	lgr := new(GormLogger)
+	lgr.SetLogger(lg)
+	return lgr
+}
+
+func (lgr *GormLogger) SetLogger(lg *logrus.Logger) *GormLogger {
+	if lg == nil {
+		lg = GetTextLogger(logrus.DebugLevel, nil)
+	}
+	lgr.lgr = lg
+	return lgr
+}
+
+func (lgr *GormLogger) Print(v ...interface{}) {
+	var data interface{}
+	if v[0] == "sql" {
+		data = v[3]
+	} else if v[0] == "log" {
+		data = v[2]
+	}
+	lgr.lgr.Debugln(data)
+}
