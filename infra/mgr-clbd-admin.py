@@ -30,7 +30,14 @@ class APIHelp:
             "_urn": "/zones/add",
             "_method": "POST",
             "_order": ["name", "description"],
-            "_summary": "Create a new Cluster Zone. Cluster Zones cannot be deleted, if at least one Cluster Node is in it."
+            "_summary": "Create a new Cluster Zone."
+        }),
+        ("remove_zone", {
+            "name": ("str", "Remove an empty Cluster Zone"),
+            "_urn": "/zones/remove",
+            "_method": "DELETE",
+            "_order": ["name"],
+            "_summary": "Delete an existing Cluster Zone. Cluster Zones cannot be deleted, if at least one Cluster Node is in it."
         })
     ]
 
@@ -160,9 +167,9 @@ class ClusterAdmin:
         if not called:
             self.__parser.print_help()
 
-    def _post(self, url: str, data: dict):
+    def _call(self, url: str, data: dict, method="POST"):
         """
-        _post -- call request POST.
+        _call -- call request POST.
 
         :param url: URI to the API endpoint
         :type url: str
@@ -172,9 +179,17 @@ class ClusterAdmin:
         if self.__director_url == "":
             raise Exception("Cluster URL is not defined.")
 
+        ret = {}
         data.update(self._dummy_token)
-        resp = requests.post(self.api_root + url, data=data)
-        ret = resp.json()
+        if method in ["POST", "GET", "DELETE"]:
+            resp = getattr(requests, method.lower())(self.api_root + url, data=data)
+        else:
+            raise Exception("Method {} not supported".format(method))
+
+        if resp.status_code != 200:
+            ret["error"] = resp.text
+        else:
+            ret = resp.json()
         ret["errcode"] = resp.status_code
         return ret
 
@@ -186,10 +201,7 @@ class ClusterAdmin:
         :rtype: dict
         """
         args = json.loads(sys.stdin.read())
-        if args["method"] == "POST":
-            ret = self._post(args["urn"], data=args["arg"])
-        else:
-            raise Exception("Method {} is unsupported yet".format(args["method"]))
+        ret = self._call(args["urn"], data=args["arg"], method=args["method"])
 
         return ret
 
@@ -197,8 +209,12 @@ class ClusterAdmin:
         """
         list_zones -- list cluster zones.
         """
-        ret = self._post("/nodes/list", {})
-        print(ret)
+        ret = self._call("/zones/list", data={}, method="GET")
+        if ret.get("errcode", 0) == 200:
+            print("Cluster zones:")
+            for zone in ret.get("data", []):
+                print("  - ", zone["name"])
+                print("    ", zone["description"])
         return True
 
     def list_nodes(self) -> bool:
@@ -235,6 +251,7 @@ def main():
         ClusterAdmin(p).run()
     except Exception as exc:
         print("Error:", exc)
+        raise
 
 if __name__ == "__main__":
     main()
