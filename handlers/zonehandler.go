@@ -37,7 +37,7 @@ func (zh *ZoneHandler) Handlers() []*HandlerMeta {
 		&HandlerMeta{
 			Route:   zh.ToRoute("list"),
 			Handle:  zh.ListZones,
-			Methods: []string{POST, GET},
+			Methods: []string{GET},
 		},
 		&HandlerMeta{
 			Route:   zh.ToRoute("add"),
@@ -54,23 +54,90 @@ func (zh *ZoneHandler) Handlers() []*HandlerMeta {
 			Handle:  zh.UpdateZone,
 			Methods: []string{POST},
 		},
+		&HandlerMeta{
+			Route:   zh.ToRoute("stats"),
+			Handle:  zh.ZoneStats,
+			Methods: []string{GET},
+		},
 	}
 }
 
-// AddZone creates a zone in the cluster
-func (zh *ZoneHandler) AddZone(ctx *gin.Context) {
+// ZoneStats godoc
+// @Summary Return Zone stats.
+// @Description ZoneStats returns data about zone.
+// @ID zone-stats
+// @Accept json
+// @Produce json
+// @Param name query string true "Name of the Zone"
+// @Header 200 {string} Token "0"
+// @Router /api/v1/zones/stats [get]
+func (zh *ZoneHandler) ZoneStats(ctx *gin.Context) {
+	zh.GetLogger().Errorln("Zone stats not yet implemented")
+	ctx.JSON(http.StatusOK, gin.H{"error": "Not implemented yet"})
 }
 
-// UpdateZone updates a zone data
+// AddZone godoc
+// @Summary Define a cluster Zone.
+// @Description AddZone creates a new empty zone in the cluster.
+// @ID add-zone
+// @Accept json
+// @Produce json
+// @Param name query string true "Name of the Zone"
+// @Param description query string true "Zone description"
+// @Header 200 {string} Token "0"
+// @Router /api/v1/zones/add [post]
+func (zh *ZoneHandler) AddZone(ctx *gin.Context) {
+	err := ctx.Request.ParseForm()
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	errcode, msg := zh.GetValidators().VerifyRequired(ctx.Request, "name", "description")
+	if errcode != http.StatusOK {
+		ctx.JSON(errcode, gin.H{"error": msg})
+		return
+	}
+
+	name := ctx.Request.Form.Get("name")
+	descr := ctx.Request.Form.Get("description")
+	zh.bnd.CreateZone(name, descr)
+
+	ctx.JSON(200, gin.H{"foo": "bar"})
+}
+
+// UpdateZone godoc
+// @Summary Update a cluster Zone
+// @Description UpdateZone updates a zone data,
+// @ID update-zone
+// @Accept json
+// @Produce json
+// @Param description query string true "Zone description"
+// @Header 200 {string} Token "0"
+// @Router /api/v1/zones/update [post]
 func (zh *ZoneHandler) UpdateZone(ctx *gin.Context) {
 }
 
-// RemoveZone removes a zone from the cluster, but only if it is
-// empty (no nodes assigned to it).
+// RemoveZone godoc
+// @Summary Remove an empty cluster Zone
+// @Description RemoveZone removes a zone from the cluster, but only if it is empty (no nodes assigned to it).
+// @ID remove-zone
+// @Accept json
+// @Produce json
+// @Param name query string true "Name of the Zone"
+// @Header 200 {string} Token "0"
+// @Router /api/v1/zones/remove [delete]
 func (zh *ZoneHandler) RemoveZone(ctx *gin.Context) {
 }
 
-// Handle implements the entry point of the handler
+// ListZones godoc
+// @Summary List cluster zones
+// @Description List all zones in the Cluster.
+// @ID list-zones
+// @Accept  json
+// @Produce  json
+// @Header 200 {string} Token "0"
+// @Router /api/v1/zones/list [get]
 func (nh *ZoneHandler) ListZones(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{
 		"zones": gin.H{
