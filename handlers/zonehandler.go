@@ -1,6 +1,7 @@
 package hdl
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/isbm/mgr-clbd/backend"
 	"github.com/isbm/mgr-clbd/dbx"
@@ -87,23 +88,28 @@ func (zh *ZoneHandler) ZoneStats(ctx *gin.Context) {
 // @Header 200 {string} Token "0"
 // @Router /api/v1/zones/add [post]
 func (zh *ZoneHandler) AddZone(ctx *gin.Context) {
+	ret := NewReturnType(ctx)
 	err := ctx.Request.ParseForm()
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ret.SetError(err).SetErrorCode(http.StatusBadRequest).SendJSON()
 		return
 	}
 
 	errcode, msg := zh.GetValidators().VerifyRequired(ctx.Request, "name", "description")
 	if errcode != http.StatusOK {
-		ctx.JSON(errcode, gin.H{"error": msg})
+		ret.SetErrorMessage(msg).SetErrorCode(errcode).SendJSON()
 		return
 	}
 
 	name := ctx.Request.Form.Get("name")
 	descr := ctx.Request.Form.Get("description")
-	zh.bnd.CreateZone(name, descr)
-
-	ctx.JSON(200, gin.H{"foo": "bar"})
+	err = zh.bnd.CreateZone(name, descr)
+	if err != nil {
+		ret.SetError(err).SetErrorCode(http.StatusNotAcceptable)
+	} else {
+		ret.SetMessage(fmt.Sprintf("Zone '%s' has been added", name))
+	}
+	ret.SendJSON()
 }
 
 // UpdateZone godoc
