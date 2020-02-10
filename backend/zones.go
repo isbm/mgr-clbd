@@ -23,8 +23,11 @@ func (z *Zones) CreateZone(name string, descr string) error {
 		Name: name, Description: descr,
 	}
 	if z.db.DB().NewRecord(zone) {
-		z.db.DB().Create(&zone)
-		logger.Infof("Added a new Zone %s", name)
+		if err = z.db.DB().Create(&zone).Error; err != nil {
+			logger.Errorln(err.Error())
+		} else {
+			logger.Infof("Added a new Zone %s", name)
+		}
 	} else {
 		err = fmt.Errorf("Unable to add a new Zone '%s'", name)
 		logger.Errorln(err.Error())
