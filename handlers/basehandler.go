@@ -1,8 +1,11 @@
 package hdl
 
 import (
+	"github.com/gin-gonic/gin"
 	"github.com/isbm/mgr-clbd/utils"
 	"github.com/sirupsen/logrus"
+	"net/http"
+	"net/url"
 	"path"
 	"strings"
 )
@@ -41,4 +44,40 @@ func (bh *BaseHandler) GetValidators() *utils.Validators {
 		bh._validators = utils.NewValidators()
 	}
 	return bh._validators
+}
+
+// InitBody parses query in body (usually ends up on DELETE methods)
+func (bh *BaseHandler) InitBody(ctx *gin.Context, names ...string) *ReturnType {
+	ret := NewReturnType(ctx)
+	data, err := ctx.GetRawData()
+	if err != nil {
+		ret.SetError(err).SetErrorCode(http.StatusBadRequest).SendJSON()
+		return nil
+	}
+
+	values, err := url.ParseQuery(string(data))
+	if err != nil {
+		ret.SetError(err).SetErrorCode(http.StatusBadRequest).SendJSON()
+		return nil
+	}
+
+	return ret.SetValues(&values)
+}
+
+// InitForm initialises the form in the Request object instance
+// and returns standard return type.
+func (bh *BaseHandler) InitForm(ctx *gin.Context, names ...string) *ReturnType {
+	ret := NewReturnType(ctx)
+	err := ctx.Request.ParseForm()
+	if err != nil {
+		ret.SetError(err).SetErrorCode(http.StatusBadRequest).SendJSON()
+		return nil
+	}
+
+	errcode, msg := bh.GetValidators().VerifyRequired(ctx.Request, names...)
+	if errcode != http.StatusOK {
+		ret.SetErrorMessage(msg).SetErrorCode(errcode).SendJSON()
+		return nil
+	}
+	return ret
 }
