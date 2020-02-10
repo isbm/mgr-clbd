@@ -7,11 +7,28 @@ import json
 import textwrap
 from typing import Any
 
+class OutputFormatter:
+    """
+    Generic output formatter.
+    """
+    def format(self, jsondata: dict) -> str:
+        """
+        format -- Format JSON to the stdout
+
+        :param jsondata: dictionary to format the data
+        :type jsondata: dict
+        :return: formatter string for the output
+        :rtype: str
+        """
+        return str(jsondata)  # Ha-ha.
+
 class APIHelp:
     api = [
         ("add_zone", {
             "name": ("str", "Name of the Cluster Zone"),
             "description": ("str", "Short summary of the Zone"),
+            "_urn": "/zones/add",
+            "_method": "POST",
             "_order": ["name", "description"],
             "_summary": "Create a new Cluster Zone. Cluster Zones cannot be deleted, if at least one Cluster Node is in it."
         })
@@ -46,6 +63,8 @@ class APIHelp:
         for descr in self.api:
             apiname, apidata = descr
             if name == apiname:
+                inp["method"] = apidata["_method"]
+                inp["urn"] = apidata["_urn"]
                 for pname in apidata["_order"]:
                     ptype, pdescr = apidata[pname]
                     sys.stderr.write("Define '{}' ({}): ".format(pname, ptype))
@@ -81,7 +100,9 @@ class APIHelp:
 
         sample = {
             "api": apiname,
-            "arg": apiargs
+            "arg": apiargs,
+            "urn": "/endpoint/function",
+            "method": "<POST or GET>"
         }
 
         print(json.dumps(sample, sort_keys=True, indent=3))
@@ -132,6 +153,9 @@ class ClusterAdmin:
             called = self.apihelp.help_on_api(self.__args.help_api)
         elif self.__args.input:
             called = self.apihelp.create_json_input(self.__args.input)
+        elif self.__args.command:
+            sys.stdout.write(OutputFormatter().format(self.json_call()))
+            called = True
 
         if not called:
             self.__parser.print_help()
@@ -154,6 +178,21 @@ class ClusterAdmin:
         ret["errcode"] = resp.status_code
         return ret
 
+    def json_call(self) -> dict:
+        """
+        json_call -- call a remote API endpoint on JSON input.
+
+        :return: JSON dictionary result
+        :rtype: dict
+        """
+        args = json.loads(sys.stdin.read())
+        if args["method"] == "POST":
+            ret = self._post(args["urn"], data=args["arg"])
+        else:
+            raise Exception("Method {} is unsupported yet".format(args["method"]))
+
+        return ret
+
     def list_zones(self) -> bool:
         """
         list_zones -- list cluster zones.
@@ -161,13 +200,6 @@ class ClusterAdmin:
         ret = self._post("/nodes/list", {})
         print(ret)
         return True
-
-    def add_zone(self) -> bool:
-        """
-        add_zone -- create a zone in the cluster.
-        """
-        return True
-
 
     def list_nodes(self) -> bool:
         """
@@ -199,7 +231,10 @@ def main():
     funcs.add_argument("-c", "--command", help="Call an API endpoint with the JSON input command", action="store_true")
     funcs.add_argument("-i", "--input", help="Construct a JSON input command")
 
-    ClusterAdmin(p).run()
+    try:
+        ClusterAdmin(p).run()
+    except Exception as exc:
+        print("Error:", exc)
 
 if __name__ == "__main__":
     main()
