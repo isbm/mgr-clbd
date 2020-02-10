@@ -13,7 +13,7 @@ endif
 SOURCES = \
 	*.go
 
-all: mainbuild
+all: swagger mainbuild
 
 mainbuild: $(SOURCES)
 	$(GO) build -x -o $(OUT) $(SOURCES)
@@ -35,5 +35,9 @@ clean:
 
 flush-cache:
 	$(GO) clean -cache -modcache -i -r
+
+swagger:
+	$(GO) get -u github.com/swaggo/swag/cmd/swag
+	cd ..;swag init -g cmd/mgr-clbd.go -o ./docs
 
 .PHONY: all install clean

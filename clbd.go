@@ -4,10 +4,13 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/isbm/mgr-clbd/dbx"
+	_ "github.com/isbm/mgr-clbd/docs"
 	"github.com/isbm/mgr-clbd/handlers"
 	"github.com/isbm/mgr-clbd/utils"
 	"github.com/logrusorgru/aurora"
 	"github.com/sirupsen/logrus"
+	swaggerFiles "github.com/swaggo/files"
+	"github.com/swaggo/gin-swagger"
 	"net/http"
 	"os"
 	"path"
@@ -40,10 +43,13 @@ func NewAPIEndPoint(root string, db *dbx.Dbx) *APIEndPoint {
 	api.server.Use(api.GinLogger())
 
 	// Setup middleware
-	api.mw = NewMiddleware(api.root)
-	for _, method := range api.mw.Methods {
-		api.server.Use(method)
-	}
+	//api.mw = NewMiddleware(api.root)
+	//for _, method := range api.mw.Methods {
+	//	api.server.Use(method)
+	//}
+
+	url := ginSwagger.URL("http://localhost:9080/swagger/doc.json")
+	api.server.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
 
 	return api
 }
