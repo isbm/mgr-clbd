@@ -5,21 +5,54 @@ import requests
 import sys
 import json
 import textwrap
+from typing import Any
 
 class APIHelp:
     api = [
         ("add_zone", {
-            "name": ("string", "Name of the Cluster Zone"),
-            "description": ("text", "Short summary of the Zone"),
+            "name": ("str", "Name of the Cluster Zone"),
+            "description": ("str", "Short summary of the Zone"),
             "_order": ["name", "description"],
             "_summary": "Create a new Cluster Zone. Cluster Zones cannot be deleted, if at least one Cluster Node is in it."
         })
     ]
 
-    def create_json_input(self):
+    def cast(self, value: str, tname: str) -> Any:
         """
-        create_json_input -- interactively constructs JSON input.
+        cast -- cast a data to a type.
+
+        :param value: any value in string
+        :type tname: str
+        :param tname: type name (Python conventions)
+        :type tname: str
+        :return: typed valued
+        :rtype: Any
         """
+        out = None
+        if tname == "int":
+            out = int(value)
+        else:
+            out = str(value)
+        return out
+
+    def create_json_input(self, name: str) -> bool:
+        """
+        create_json_input -- interactively construct JSON input.
+
+        :param name: name of the API call
+        :type name: str
+        """
+        inp = {"api": name, "arg": {}}
+        for descr in self.api:
+            apiname, apidata = descr
+            if name == apiname:
+                for pname in apidata["_order"]:
+                    ptype, pdescr = apidata[pname]
+                    sys.stderr.write("Define '{}' ({}): ".format(pname, ptype))
+                    pdata = input()
+                    inp["arg"][pname] = self.cast(pdata, ptype)
+        print(json.dumps(inp, indent=4))
+        return True
 
     def list_api(self) -> bool:
         """
@@ -97,6 +130,8 @@ class ClusterAdmin:
             called = self.apihelp.list_api()
         elif self.__args.help_api:
             called = self.apihelp.help_on_api(self.__args.help_api)
+        elif self.__args.input:
+            called = self.apihelp.create_json_input(self.__args.input)
 
         if not called:
             self.__parser.print_help()
@@ -161,8 +196,8 @@ def main():
     funcs = p.add_argument_group("API functions")
     funcs.add_argument("-f", "--list-api", help="List all API functions", action="store_true")
     funcs.add_argument("-d", "--help-api", help="Get help on an API function")
-    funcs.add_argument("-c", "--command", help="Operate on a JSON input command", action="store_true")
-    funcs.add_argument("-i", "--input", help="Construct a JSON input command", action="store_true")
+    funcs.add_argument("-c", "--command", help="Call an API endpoint with the JSON input command", action="store_true")
+    funcs.add_argument("-i", "--input", help="Construct a JSON input command")
 
     ClusterAdmin(p).run()
 
