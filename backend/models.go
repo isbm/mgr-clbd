@@ -21,21 +21,21 @@ const (
 )
 
 type ClusterZone struct {
-	gorm.Model
-	Name         string
-	Description  string
-	ClusterNodes []ClusterNode `gorm:"foreignkey:ZoneID"`
+	ID          int64
+	Name        string
+	Description string
 }
 
 // Cluster node object
 type ClusterNode struct {
-	ID            int64
+	gorm.Model
 	Fqdn          string
 	MachineId     string // systemd
 	ClientSystems int64
 	LoadAverage   float64 // 5 min
 	Status        uint
-	ZoneID        uint
+	Zone          ClusterZone `gorm:"foreignkey:ZoneId"`
+	ZoneId        uint
 }
 
 // Client system object
