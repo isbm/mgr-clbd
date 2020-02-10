@@ -34,11 +34,10 @@ func NewAPIEndPoint(root string, db *dbx.Dbx) *APIEndPoint {
 	api.handlers = make([]hdl.Handler, 0)
 
 	// Setup server
-	api.server = gin.New()
 	gin.SetMode(gin.ReleaseMode)
+	api.server = gin.New()
 	api.server.Use(gin.Recovery())
 	api.server.Use(api.GinLogger())
-	//api.server.Use(ginrus.Ginrus(logrus.StandardLogger(), time.RFC3339, true))
 
 	// Setup middleware
 	api.mw = NewMiddleware(api.root)
