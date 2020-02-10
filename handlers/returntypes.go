@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"net/url"
 	"strings"
 )
 
@@ -13,6 +14,7 @@ type ReturnType struct {
 	msg     string
 	payload interface{}
 	ctx     *gin.Context
+	values  *url.Values
 }
 
 func NewReturnType(ctx *gin.Context) *ReturnType {
@@ -21,6 +23,15 @@ func NewReturnType(ctx *gin.Context) *ReturnType {
 	rt.ctx = ctx
 
 	return rt
+}
+
+func (rt *ReturnType) SetValues(values *url.Values) *ReturnType {
+	rt.values = values
+	return rt
+}
+
+func (rt *ReturnType) GetValues() *url.Values {
+	return rt.values
 }
 
 func (rt *ReturnType) SetErrorMessage(msg string) *ReturnType {
