@@ -48,7 +48,7 @@ func (zh *ZoneHandler) Handlers() []*HandlerMeta {
 		&HandlerMeta{
 			Route:   zh.ToRoute("remove"),
 			Handle:  zh.RemoveZone,
-			Methods: []string{POST}, // XXX: Probably should be DELETE instead
+			Methods: []string{DELETE}, // XXX: Probably should be DELETE instead
 		},
 		&HandlerMeta{
 			Route:   zh.ToRoute("update"),
@@ -88,22 +88,11 @@ func (zh *ZoneHandler) ZoneStats(ctx *gin.Context) {
 // @Header 200 {string} Token "0"
 // @Router /api/v1/zones/add [post]
 func (zh *ZoneHandler) AddZone(ctx *gin.Context) {
-	ret := NewReturnType(ctx)
-	err := ctx.Request.ParseForm()
-	if err != nil {
-		ret.SetError(err).SetErrorCode(http.StatusBadRequest).SendJSON()
-		return
-	}
-
-	errcode, msg := zh.GetValidators().VerifyRequired(ctx.Request, "name", "description")
-	if errcode != http.StatusOK {
-		ret.SetErrorMessage(msg).SetErrorCode(errcode).SendJSON()
-		return
-	}
+	ret := zh.InitForm(ctx, "name", "description")
 
 	name := ctx.Request.Form.Get("name")
 	descr := ctx.Request.Form.Get("description")
-	err = zh.bnd.CreateZone(name, descr)
+	err := zh.bnd.CreateZone(name, descr)
 	if err != nil {
 		ret.SetError(err).SetErrorCode(http.StatusNotAcceptable)
 	} else {
@@ -134,6 +123,19 @@ func (zh *ZoneHandler) UpdateZone(ctx *gin.Context) {
 // @Header 200 {string} Token "0"
 // @Router /api/v1/zones/remove [delete]
 func (zh *ZoneHandler) RemoveZone(ctx *gin.Context) {
+	ret := zh.InitBody(ctx, "name")
+	if ret == nil {
+		return
+	}
+	name := ret.GetValues().Get("name")
+	err := zh.bnd.RemoveZone(name)
+	if err != nil {
+		ret.SetError(err).SetErrorCode(http.StatusBadRequest)
+	} else {
+		ret.SetMessage(fmt.Sprintf("Zone '%s' has been removed", name))
+	}
+
+	ret.SendJSON()
 }
 
 // ListZones godoc
@@ -144,10 +146,13 @@ func (zh *ZoneHandler) RemoveZone(ctx *gin.Context) {
 // @Produce  json
 // @Header 200 {string} Token "0"
 // @Router /api/v1/zones/list [get]
-func (nh *ZoneHandler) ListZones(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, gin.H{
-		"zones": gin.H{
-			"name": "foo",
-		},
-	})
+func (zh *ZoneHandler) ListZones(ctx *gin.Context) {
+	pl := make([]map[string]string, 0)
+	for _, zone := range zh.bnd.ListZones() {
+		pzone := make(map[string]string)
+		pzone["name"] = zone.Name
+		pzone["description"] = zone.Description
+		pl = append(pl, pzone)
+	}
+	NewReturnType(ctx).SetErrorCode(http.StatusOK).SetPayload(pl).SendJSON()
 }
