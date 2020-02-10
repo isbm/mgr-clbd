@@ -9,9 +9,10 @@ import (
 )
 
 const (
-	ANY  = "any"
-	POST = "post"
-	GET  = "get"
+	ANY    = "any"
+	POST   = "post"
+	GET    = "get"
+	DELETE = "delete"
 )
 
 type HandlerMeta struct {
