@@ -1,0 +1,85 @@
+info:
+  contact: {}
+  license: {}
+paths:
+  /api/v1/zones/add:
+    post:
+      consumes:
+      - application/json
+      description: AddZone creates a new empty zone in the cluster.
+      operationId: add-zone
+      parameters:
+      - description: Name of the Zone
+        in: query
+        name: name
+        required: true
+        type: string
+      - description: Zone description
+        in: query
+        name: description
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Define a cluster Zone.
+  /api/v1/zones/list:
+    get:
+      consumes:
+      - application/json
+      description: List all zones in the Cluster.
+      operationId: list-zones
+      produces:
+      - application/json
+      responses: {}
+      summary: List cluster zones
+  /api/v1/zones/remove:
+    delete:
+      consumes:
+      - application/json
+      description: RemoveZone removes a zone from the cluster, but only if it is empty
+        (no nodes assigned to it).
+      operationId: remove-zone
+      parameters:
+      - description: Name of the Zone
+        in: query
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Remove an empty cluster Zone
+  /api/v1/zones/stats:
+    get:
+      consumes:
+      - application/json
+      description: ZoneStats returns data about zone.
+      operationId: zone-stats
+      parameters:
+      - description: Name of the Zone
+        in: query
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Return Zone stats.
+  /api/v1/zones/update:
+    post:
+      consumes:
+      - application/json
+      description: UpdateZone updates a zone data,
+      operationId: update-zone
+      parameters:
+      - description: Zone description
+        in: query
+        name: description
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Update a cluster Zone
+swagger: "2.0"
