@@ -6,6 +6,7 @@ import sys
 import json
 import textwrap
 from typing import Any
+import pprint
 
 class OutputFormatter:
     """
@@ -23,23 +24,54 @@ class OutputFormatter:
         return str(jsondata)  # Ha-ha.
 
 class APIHelp:
-    api = [
-        ("add_zone", {
-            "name": ("str", "Name of the Cluster Zone"),
-            "description": ("str", "Short summary of the Zone"),
-            "_urn": "/zones/add",
-            "_method": "POST",
-            "_order": ["name", "description"],
-            "_summary": "Create a new Cluster Zone."
-        }),
-        ("remove_zone", {
-            "name": ("str", "Remove an empty Cluster Zone"),
-            "_urn": "/zones/remove",
-            "_method": "DELETE",
-            "_order": ["name"],
-            "_summary": "Delete an existing Cluster Zone. Cluster Zones cannot be deleted, if at least one Cluster Node is in it."
-        })
-    ]
+    """
+    API Help builds OpenAPI-based definitions.
+    """
+    def __init__(self, url: str):
+        """
+        __init__ -- constructor
+        """
+        self.__api_cache = []
+        self._url = url
+        self.api = []
+        self._update_api()
+
+    @staticmethod
+    def type2python(typename: str) -> str:
+        """
+        type2python -- Convert OpenAPI types to Python types
+
+        :param typename: name of the type
+        :type typename: str
+        :return: new type name
+        :rtype: str
+        """
+        out = ""
+        if typename == "string":
+            out = "str"
+        else:
+            out = typename
+        return out
+
+    def _update_api(self):
+        """
+        _upate_api -- get OpenAPI definitions and format it.
+        """
+        self.api.clear()
+        buff = requests.get(self._url + "/swagger/doc.json").json()["paths"]
+        for apipath in buff:
+            for method in buff[apipath]:
+                apidata = buff[apipath][method]
+                apiset = {
+                    "_urn": apipath.replace("/api/v1", ""),
+                    "_method": method.upper(),
+                    "_order": [],
+                    "_summary": apidata.get("description", "N/A")
+                }
+                for argset in apidata.get("parameters", []):
+                    apiset[argset["name"]] = (self.type2python(argset["type"]), argset["description"])
+                    apiset["_order"].append(argset["name"])
+                self.api.append((apidata["operationId"].replace("-", "_").lower(), apiset,))
 
     def cast(self, value: str, tname: str) -> Any:
         """
@@ -144,7 +176,7 @@ class ClusterAdmin:
         self.__args = self.__parser.parse_args()
         self.__director_url = self.__args.director_url or ""
         self.api_root = self.__director_url + "/api/v1"
-        self.apihelp = APIHelp()
+        self.apihelp = APIHelp(self.__director_url)
 
         self._dummy_token = {"token": "0"}
 
