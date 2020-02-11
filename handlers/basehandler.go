@@ -87,3 +87,16 @@ func (bh *BaseHandler) InitForm(ctx *gin.Context, names ...string) *ReturnType {
 	}
 	return ret.SetValues(&ctx.Request.Form)
 }
+
+// initQuery initialises the GET query from the URL and validates the required fields
+func (bh *BaseHandler) InitQuery(ctx *gin.Context, names ...string) *ReturnType {
+	query := ctx.Request.URL.Query()
+	ret := NewReturnType(ctx).SetValues(&query)
+
+	errcode, msg := bh.GetValidators().VerifyRequired(nil, ret.GetValues(), names...)
+	if errcode != http.StatusOK {
+		ret.SetErrorMessage(msg).SetErrorCode(errcode).SendJSON()
+		return nil
+	}
+	return ret
+}

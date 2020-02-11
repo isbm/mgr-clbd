@@ -61,21 +61,13 @@ func (z *Zones) UpdateZone(name string, descr string) error {
 // RemoveZone removes an empty zone. If zone still contains nodes,
 // it won't be removed, but error will be issued.
 func (z *Zones) RemoveZone(name string) error {
-	var err error
-
-	zone := &ClusterZone{}
-	z.db.DB().Where("name = ?", name).First(&zone)
-	if zone.ID == 0 && zone.Name == "" {
-		err = fmt.Errorf("Zone %s was not found", name)
-		logger.Errorln(err.Error())
+	nodesCnt, err := z.NodesInZone(name)
+	if err != nil {
 		return err
 	}
 
-	nodes := make([]ClusterNode, 0)
-	z.db.DB().Where("name = ?", name).Find(&nodes)
-	if len(nodes) != 0 {
-		nodes = nil
-		err = fmt.Errorf("Zone still contains %d nodes", len(nodes))
+	if nodesCnt != 0 {
+		err = fmt.Errorf("Zone still contains %d nodes", nodesCnt)
 		logger.Errorf("Attempt to delete non-empty zone '%s'", name)
 		return err
 	}
@@ -90,7 +82,17 @@ func (z *Zones) RemoveZone(name string) error {
 }
 
 // NodesInZone returns an amount of attached cluster nodes to the zone
-func (z *Zones) NodesInZone(name string) int {
+func (z *Zones) NodesInZone(name string) (int, error) {
+	var err error
+	zone := &ClusterZone{}
+	z.db.DB().Where("name = ?", name).First(&zone)
+	if zone.ID == 0 && zone.Name == "" {
+		err = fmt.Errorf("Zone %s was not found", name)
+		logger.Errorln(err.Error())
+		return -1, err
+	}
 
-	return 0
+	nodes := make([]ClusterNode, 0)
+	z.db.DB().Where("name = ?", name).Find(&nodes)
+	return len(nodes), err
 }

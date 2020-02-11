@@ -73,8 +73,16 @@ func (zh *ZoneHandler) Handlers() []*HandlerMeta {
 // @Header 200 {string} Token "0"
 // @Router /api/v1/zones/stats [get]
 func (zh *ZoneHandler) ZoneStats(ctx *gin.Context) {
-	zh.GetLogger().Errorln("Zone stats not yet implemented")
-	ctx.JSON(http.StatusOK, gin.H{"error": "Not implemented yet"})
+	ret := zh.InitQuery(ctx, "name")
+	if ret == nil {
+		return
+	}
+	nodes, err := zh.bnd.NodesInZone(ret.GetValues().Get("name"))
+	if err != nil {
+		ret.SetErrorCode(http.StatusBadRequest).SetError(err)
+	} else {
+		ret.SetPayload(gin.H{"nodes": nodes}).SendJSON()
+	}
 }
 
 // AddZone godoc
@@ -89,7 +97,9 @@ func (zh *ZoneHandler) ZoneStats(ctx *gin.Context) {
 // @Router /api/v1/zones/add [post]
 func (zh *ZoneHandler) AddZone(ctx *gin.Context) {
 	ret := zh.InitForm(ctx, "name", "description")
-
+	if ret == nil {
+		return
+	}
 	name := ctx.Request.Form.Get("name")
 	descr := ctx.Request.Form.Get("description")
 	err := zh.bnd.CreateZone(name, descr)
