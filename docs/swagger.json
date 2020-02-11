@@ -109,6 +109,13 @@
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Name of the Zone",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "Zone description",
                         "name": "description",
                         "in": "query",

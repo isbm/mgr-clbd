@@ -73,6 +73,11 @@ paths:
       description: UpdateZone updates a zone data,
       operationId: update-zone
       parameters:
+      - description: Name of the Zone
+        in: query
+        name: name
+        required: true
+        type: string
       - description: Zone description
         in: query
         name: description
