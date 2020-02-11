@@ -52,8 +52,10 @@ class ClusterAdmin:
 
         ret = {}
         data.update(self._dummy_token)
-        if method in ["POST", "GET", "DELETE"]:
+        if method in ["POST", "DELETE"]:
             resp = getattr(requests, method.lower())(self.api_root + url, data=data)
+        elif method == "GET":
+            resp = requests.get(self.api_root + url, params=data)
         else:
             raise Exception("Method {} not supported".format(method))
 
