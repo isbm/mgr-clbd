@@ -134,7 +134,7 @@ func (zh *ZoneHandler) UpdateZone(ctx *gin.Context) {
 	if err != nil {
 		ret.SetError(err).SetErrorCode(http.StatusBadRequest)
 	} else {
-		ret.SetMessage(fmt.Sprintf("Zone '%s' has been updated", "name"))
+		ret.SetMessage(fmt.Sprintf("Zone '%s' has been updated", name))
 	}
 
 	ret.SendJSON()
