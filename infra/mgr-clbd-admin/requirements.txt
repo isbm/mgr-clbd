@@ -1,0 +1,6 @@
+setuptools
+pytest
+pudb
+Jinja2
+requests
+mypy
