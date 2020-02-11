@@ -79,5 +79,5 @@ func (bh *BaseHandler) InitForm(ctx *gin.Context, names ...string) *ReturnType {
 		ret.SetErrorMessage(msg).SetErrorCode(errcode).SendJSON()
 		return nil
 	}
-	return ret
+	return ret.SetValues(&ctx.Request.Form)
 }
