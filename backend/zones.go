@@ -43,6 +43,21 @@ func (z *Zones) ListZones() []ClusterZone {
 	return zones
 }
 
+// UpdateZone updates an existing zone.
+func (z *Zones) UpdateZone(name string, descr string) error {
+	var err error
+	zone := &ClusterZone{}
+	if err = z.db.DB().Where("name = ?", name).First(&zone).Error; err != nil {
+		logger.Errorln(err.Error())
+	} else {
+		zone.Description = descr
+		z.db.DB().Save(&zone)
+		logger.Infof("Zone '%s' has been updated", name)
+	}
+
+	return err
+}
+
 // RemoveZone removes an empty zone. If zone still contains nodes,
 // it won't be removed, but error will be issued.
 func (z *Zones) RemoveZone(name string) error {

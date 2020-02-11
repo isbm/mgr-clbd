@@ -107,10 +107,27 @@ func (zh *ZoneHandler) AddZone(ctx *gin.Context) {
 // @ID update-zone
 // @Accept json
 // @Produce json
+// @Param name query string true "Name of the Zone"
 // @Param description query string true "Zone description"
 // @Header 200 {string} Token "0"
 // @Router /api/v1/zones/update [post]
 func (zh *ZoneHandler) UpdateZone(ctx *gin.Context) {
+	ret := zh.InitForm(ctx, "name", "description")
+	if ret == nil {
+		return
+	}
+
+	name := ret.GetValues().Get("name")
+	descr := ret.GetValues().Get("description")
+
+	err := zh.bnd.UpdateZone(name, descr)
+	if err != nil {
+		ret.SetError(err).SetErrorCode(http.StatusBadRequest)
+	} else {
+		ret.SetMessage(fmt.Sprintf("Zone '%s' has been updated", "name"))
+	}
+
+	ret.SendJSON()
 }
 
 // RemoveZone godoc
