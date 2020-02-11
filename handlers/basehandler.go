@@ -61,6 +61,12 @@ func (bh *BaseHandler) InitBody(ctx *gin.Context, names ...string) *ReturnType {
 		return nil
 	}
 
+	errcode, msg := bh.GetValidators().VerifyRequired(nil, &values, names...)
+	if errcode != http.StatusOK {
+		ret.SetErrorMessage(msg).SetErrorCode(errcode).SendJSON()
+		return nil
+	}
+
 	return ret.SetValues(&values)
 }
 
@@ -74,7 +80,7 @@ func (bh *BaseHandler) InitForm(ctx *gin.Context, names ...string) *ReturnType {
 		return nil
 	}
 
-	errcode, msg := bh.GetValidators().VerifyRequired(ctx.Request, names...)
+	errcode, msg := bh.GetValidators().VerifyRequired(ctx.Request, nil, names...)
 	if errcode != http.StatusOK {
 		ret.SetErrorMessage(msg).SetErrorCode(errcode).SendJSON()
 		return nil
