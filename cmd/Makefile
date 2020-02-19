@@ -13,7 +13,7 @@ endif
 SOURCES = \
 	*.go
 
-all: swagger mainbuild
+all: update-deps swagger mainbuild strip
 
 mainbuild: $(SOURCES)
 	$(GO) build -x -o $(OUT) $(SOURCES)
@@ -24,6 +24,12 @@ ifneq ($GCCGO,)
 else
 	@echo "Cannot find gccgo"
 endif
+
+strip:
+	strip $(OUT)
+
+update-deps:
+	$(GO) get -u
 
 deps:
 	$(GO) get -v ./... 2>/dev/null ||:
