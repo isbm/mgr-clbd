@@ -137,12 +137,12 @@ func (api *APIEndPoint) AddHandler(handler hdl.Handler) *APIEndPoint {
 				api.server.Any(urn, hmeta.Handle)
 			}
 		}
-		api.logger.Debugln("Added handler at", urn)
+		api.logger.Debugln("Initialise API endpoint at", urn)
 	}
 	return api
 }
 
-func (api *APIEndPoint) BootDb() {
+func (api *APIEndPoint) BootBackends() {
 	for _, handler := range api.handlers {
 		backend := handler.Backend()
 		if backend != nil {
@@ -157,7 +157,7 @@ func (api *APIEndPoint) Start() {
 		panic(err)
 	}
 	defer api.db.Close()
-	api.BootDb()
+	api.BootBackends()
 	err = api.server.Run(fmt.Sprintf(":%d", api.port))
 	if err != nil {
 		panic(err)
