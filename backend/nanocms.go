@@ -21,13 +21,15 @@ import (
 
 type NanoCms struct {
 	BaseBackend
-	stateindex  *nanostate.NanoStateIndex
-	bootstrapId string
+	stateindex      *nanostate.NanoStateIndex
+	bootstrapId     string
+	sshKeysDeployed bool
 }
 
 func NewNanoCmsBackend() *NanoCms {
 	cms := new(NanoCms)
 	cms.stateindex = nanostate.NewNanoStateIndex()
+	cms.sshKeysDeployed = false
 	return cms
 }
 
@@ -76,11 +78,27 @@ func (n *NanoCms) LoadNstFile(statepath string) *nanostate.Nanostate {
 
 // SshCopyId is copying SSH keys to the target machine, using username and password
 func (n *NanoCms) SshCopyId(fqdn string, username string, password string) bool {
-	tempkey := path.Join("/root", ".ssh", fqdn+".pub")
+	var conf ssh.ClientConfig
+	var cnt scp.Client
+	var err error
 
-	conf, _ := auth.PasswordKey(username, password, ssh.InsecureIgnoreHostKey())
-	cnt := scp.NewClient(fqdn+":22", &conf)
-	err := cnt.Connect()
+	// Try if key is there already
+	u, _ := user.Current()
+	logger.Debugf("Probing SSH connection via keys to %s as %s", fqdn, username)
+	conf, _ = auth.PrivateKey(username, path.Join(u.HomeDir, ".ssh", "id_rsa"), ssh.InsecureIgnoreHostKey())
+	cnt = scp.NewClient(fqdn+":22", &conf)
+	err = cnt.Connect()
+	if err == nil {
+		cnt.Close()
+		logger.Debugf("SSH connection for user %s on %s is ready", username, fqdn)
+		return true
+	}
+	logger.Debugf("No SSH key-based connection yet at %s for %s, deploying...", fqdn, username)
+	// No key yet, copy & add
+	tempkey := path.Join("/root", ".ssh", fqdn+".pub")
+	conf, _ = auth.PasswordKey(username, password, ssh.InsecureIgnoreHostKey())
+	cnt = scp.NewClient(fqdn+":22", &conf)
+	err = cnt.Connect()
 	if err != nil {
 		logger.Errorln("Error connecting to the remote machine:", err.Error())
 		return false
@@ -145,23 +163,16 @@ func (n *NanoCms) StartUp() {}
 // All this is achieved by installing a ncd binary and let it
 // run a nanostate.
 func (n *NanoCms) Bootstrap(fqdn string, user string, password string) *ClusterNode {
-	//n.SshCopyId(fqdn, user, password)
+	logger.Debugf("Bootstrapping node '%s'...", fqdn)
 
-	/*.
-	NST:
-		1. curl binary for arch to a location (ncd)
-		2. curl service script
-		3. configuration
-		4. start service
-		5. check working
-	*/
-	// That goes from the config
+	if !n.sshKeysDeployed {
+		n.sshKeysDeployed = n.SshCopyId(fqdn, user, password)
+	}
 
-	logger.Debugln("Accessing state by ID:", n.bootstrapId)
-	logger.Debugln("NST file:", n.GetStateIndex().GetStateById(n.bootstrapId).Path)
+	nstfile := n.GetStateIndex().GetStateById(n.bootstrapId).Path
+	logger.Debugf("Running NST file by Id '%s': %s", n.bootstrapId, nstfile)
 
-	n.RunStateSSH(n.LoadNstFile(n.GetStateIndex().GetStateById(n.bootstrapId).Path), fqdn)
+	n.RunStateSSH(n.LoadNstFile(nstfile), fqdn)
 
-	logger.Debugln("Bootstrap node", fqdn)
 	return nil
 }
