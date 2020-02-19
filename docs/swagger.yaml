@@ -2,6 +2,55 @@ info:
   contact: {}
   license: {}
 paths:
+  /api/v1/node/add:
+    post:
+      consumes:
+      - application/json
+      description: This will verify if a node meets the requirements and will join
+        to the cluster.
+      operationId: add-node
+      parameters:
+      - description: FQDN of the cluster node for adding it
+        in: query
+        name: fqdn
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Add a new bootstrapped, ready node to the cluster.
+  /api/v1/node/list:
+    get:
+      consumes:
+      - application/json
+      description: List all nodes in the current cluster.
+      operationId: list-nodes
+      produces:
+      - application/json
+      responses: {}
+      summary: List nodes in the cluster.
+  /api/v1/node/stage:
+    post:
+      consumes:
+      - application/json
+      description: This will install a client binary over SSH and will run nanostate,
+        required to setup everything in place
+      operationId: stage-node
+      parameters:
+      - description: FQDN of the hostname for staging
+        in: query
+        name: fqdn
+        required: true
+        type: string
+      - description: Root password of the node
+        in: query
+        name: password
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Stage (bootstrap) a new cluster node.
   /api/v1/zones/add:
     post:
       consumes:

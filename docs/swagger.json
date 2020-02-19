@@ -5,6 +5,73 @@
         "license": {}
     },
     "paths": {
+        "/api/v1/node/add": {
+            "post": {
+                "description": "This will verify if a node meets the requirements and will join to the cluster.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Add a new bootstrapped, ready node to the cluster.",
+                "operationId": "add-node",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "FQDN of the cluster node for adding it",
+                        "name": "fqdn",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/api/v1/node/list": {
+            "get": {
+                "description": "List all nodes in the current cluster.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "List nodes in the cluster.",
+                "operationId": "list-nodes",
+                "responses": {}
+            }
+        },
+        "/api/v1/node/stage": {
+            "post": {
+                "description": "This will install a client binary over SSH and will run nanostate, required to setup everything in place",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Stage (bootstrap) a new cluster node.",
+                "operationId": "stage-node",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "FQDN of the hostname for staging",
+                        "name": "fqdn",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Root password of the node",
+                        "name": "password",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
         "/api/v1/zones/add": {
             "post": {
                 "description": "AddZone creates a new empty zone in the cluster.",
