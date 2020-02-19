@@ -14,28 +14,34 @@ import (
 func run(ctx *cli.Context) error {
 	cfg := nanoconf.NewConfig(ctx.String("config"))
 
-	cmdPort := fmt.Sprintf("%d", ctx.Int("db-port"))
+	cmdPort := fmt.Sprintf("%d", ctx.Int("kvs-port"))
 	if cmdPort == "0" || cmdPort == "4000" {
 		cmdPort = ""
 	}
 
 	db := dbx.NewDbxConnection().
-		SetUser(cfg.Find("db").String("user", "")).
-		SetPassword(cfg.Find("db").String("password", "")).
-		SetDBName(cfg.Find("db").String("name", "")).
-		SetDBHost(cfg.Find("db").String("fqdn", "")).
-		SetDBPort(cfg.Find("db").DefaultInt("port", cmdPort, 4000))
+		SetUser(cfg.Find("kvs").String("user", "")).
+		SetPassword(cfg.Find("kvs").String("password", "")).
+		SetDBName(cfg.Find("kvs").String("name", "")).
+		SetDBHost(cfg.Find("kvs").String("fqdn", "")).
+		SetDBPort(cfg.Find("kvs").DefaultInt("port", cmdPort, 4000))
 
 	cmdPort = fmt.Sprintf("%d", ctx.Int("api-port"))
 	if cmdPort == "0" || cmdPort == "8080" {
 		cmdPort = ""
 	}
+
+	nodehandler := hdl.NewNodeHandler("node")
+	nodehandler.SetConfig(cfg)
+
 	ep := clbd.NewAPIEndPoint("/api/v1", db).
 		SetPort(cfg.Find("api").DefaultInt("port", cmdPort, 8080)).
 		AddHandler(hdl.NewPingHandler("cluster")).
-		AddHandler(hdl.NewNodeHandler("nodes")).
+		AddHandler(nodehandler).
 		AddHandler(hdl.NewSystemsHandler("systems")).
 		AddHandler(hdl.NewZoneHandler("zones"))
+
+	fmt.Println("For Swagger: http://localhost:9080/swagger/index.html")
 
 	ep.Start()
 
@@ -56,9 +62,9 @@ func main() {
 				Required: true,
 			},
 			&cli.IntFlag{
-				Name:  "db-port",
+				Name:  "kvs-port",
 				Value: 4000,
-				Usage: "Specify database port (override configuration)",
+				Usage: "Specify KV store port (override configuration)",
 			},
 			&cli.IntFlag{
 				Name:  "api-port",
