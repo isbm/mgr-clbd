@@ -2,6 +2,7 @@ package hdl
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/isbm/go-nanoconf"
 	"github.com/isbm/mgr-clbd/utils"
 	"github.com/sirupsen/logrus"
 	"net/http"
@@ -14,12 +15,19 @@ type BaseHandler struct {
 	root        string
 	_validators *utils.Validators
 	_logger     *logrus.Logger
+	config      *nanoconf.Config
 }
 
 // PrepareRoot is sanitising root string, turning into a root URI
 func (bh *BaseHandler) PrepareRoot(root string) string {
 	bh.root = "/" + strings.Trim(root, "/")
 	return bh.root
+}
+
+// SetConfig passes the main configuration object to
+// the handlers that can configure backends further
+func (bh *BaseHandler) SetConfig(cfg *nanoconf.Config) {
+	bh.config = cfg
 }
 
 func (bh BaseHandler) ToRoute(route string) string {

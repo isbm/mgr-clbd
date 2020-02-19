@@ -1,3 +1,10 @@
+/*
+Handler, which among other things, interfaces the internal
+micro-configuration management system. Micro CMS is running
+nanostates to call preinstalled Ansible modules (or facilitate
+own to be deployed to the client machines).
+*/
+
 package hdl
 
 import (
@@ -9,25 +16,38 @@ import (
 
 type NodeHandler struct {
 	BaseHandler
-	db       *dbx.Dbx
-	bknNodes *backend.Nodes
+	db  *dbx.Dbx
+	orm *backend.Nodes
+	cms *backend.NanoCms
 }
 
 func NewNodeHandler(root string) *NodeHandler {
 	nh := new(NodeHandler)
 	nh.PrepareRoot(root)
-	nh.bknNodes = backend.NewNodesBackend()
+	nh.orm = backend.NewNodesBackend()
+	nh.cms = backend.NewNanoCmsBackend()
 	return nh
 }
 
-func (ph *NodeHandler) Backend() backend.Backend {
-	return ph.bknNodes
+func (nh *NodeHandler) Backend() backend.Backend {
+	// Backend is called for booting it up.
+	// Here is a hook to apply passed-on configuration
+	stateroot := nh.config.Find("general:state").String("root", "")
+	bootstrapId := nh.config.Find("general:state").String("bootstrap", "")
+	if stateroot != "" && bootstrapId != "" {
+		nh.cms.GetStateIndex().AddStateRoot(stateroot).Index()
+		nh.cms.SetBootstrapStateId(bootstrapId)
+	} else {
+		panic("Stateroot and Bootstrap Id must be specified!")
+	}
+
+	return nh.orm
 }
 
 // SetDbx sets the Dbx instance pointer
 func (nh *NodeHandler) SetDbx(db *dbx.Dbx) {
 	nh.db = db
-	nh.bknNodes.SetDbx(nh.db)
+	nh.orm.SetDbx(nh.db)
 }
 
 // Handlers returns a map of supported handlers and their configuration
@@ -35,28 +55,68 @@ func (nh *NodeHandler) Handlers() []*HandlerMeta {
 	return []*HandlerMeta{
 		&HandlerMeta{
 			Route:   nh.ToRoute("list"),
-			Handle:  nh.OnListNodes,
+			Handle:  nh.ListNodes,
 			Methods: []string{POST, GET},
 		},
 		&HandlerMeta{
+			Route:   nh.ToRoute("stage"),
+			Handle:  nh.StageNode,
+			Methods: []string{POST},
+		},
+		&HandlerMeta{
 			Route:   nh.ToRoute("add"),
-			Handle:  nh.OnAddNode,
+			Handle:  nh.AddNode,
 			Methods: []string{POST},
 		},
 	}
 }
 
-// Handle implements the entry point of the handler
-func (nh *NodeHandler) OnListNodes(ctx *gin.Context) {
-	nh.bknNodes.ListAllNodes()
+// ListNodes godoc
+// @Summary List nodes in the cluster.
+// @Description List all nodes in the current cluster.
+// @ID list-nodes
+// @Accept json
+// @Produce json
+// @Header 200 {string} Token "0"
+// @Router /api/v1/node/list [get]
+func (nh *NodeHandler) ListNodes(ctx *gin.Context) {
+	nh.orm.ListAllNodes()
 	ctx.JSON(http.StatusOK, gin.H{
 		"nodes": "listed",
 	})
 }
 
-// Handle implements the entry point of the handler
-func (nh *NodeHandler) OnAddNode(ctx *gin.Context) {
+// AddNode godoc
+// @Summary Add a new bootstrapped, ready node to the cluster.
+// @Description This will verify if a node meets the requirements and will join to the cluster.
+// @ID add-node
+// @Accept json
+// @Produce json
+// @Param fqdn query string true "FQDN of the cluster node for adding it"
+// @Header 200 {string} Token "0"
+// @Router /api/v1/node/add [post]
+func (nh *NodeHandler) AddNode(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{
 		"node": "added",
 	})
+}
+
+// StageNode godoc
+// @Summary Stage (bootstrap) a new cluster node.
+// @Description This will install a client binary over SSH and will run nanostate, required to setup everything in place
+// @ID stage-node
+// @Accept json
+// @Produce json
+// @Param fqdn query string true "FQDN of the hostname for staging"
+// @Param password query string true "Root password of the node"
+// @Header 200 {string} Token "0"
+// @Router /api/v1/node/stage [post]
+func (nh *NodeHandler) StageNode(ctx *gin.Context) {
+	ret := nh.InitForm(ctx, "fqdn", "password")
+	fqdn := ret.GetValues().Get("fqdn")
+	passwd := ret.GetValues().Get("password")
+
+	nh.cms.Bootstrap(fqdn, "root", passwd)
+
+	ret.SendJSON()
 }

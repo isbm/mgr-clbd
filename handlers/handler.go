@@ -4,6 +4,7 @@ package hdl
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/isbm/go-nanoconf"
 	"github.com/isbm/mgr-clbd/backend"
 	"github.com/isbm/mgr-clbd/dbx"
 )
@@ -33,4 +34,8 @@ type Handler interface {
 
 	// Set Dbx object to cross-access the database calls
 	SetDbx(db *dbx.Dbx)
+
+	// SetConfig passes the main configuration object to
+	// the handlers that can configure backends further
+	SetConfig(cfg *nanoconf.Config)
 }
