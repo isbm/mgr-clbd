@@ -32,6 +32,9 @@ func (n *Nodes) StartUp() {
 //   - reset the database to the initial state (remove all
 //     systems, channels etc)
 //   - Confirm this done and ack the response
+//
+// All this is achieved by installing a ncd binary and let it
+// run a nanostate.
 func (n *Nodes) StageNode(node *ClusterNode) {
 	logger.Debugln("Stage node")
 }
