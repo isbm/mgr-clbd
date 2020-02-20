@@ -33,10 +33,8 @@ func (nh *NodeHandler) Backend() backend.Backend {
 	// Backend is called for booting it up.
 	// Here is a hook to apply passed-on configuration
 	stateroot := nh.config.Find("general:state").String("root", "")
-	bootstrapId := nh.config.Find("general:state").String("bootstrap", "")
-	if stateroot != "" && bootstrapId != "" {
+	if stateroot != "" {
 		nh.cms.GetStateIndex().AddStateRoot(stateroot).Index()
-		nh.cms.SetBootstrapStateId(bootstrapId)
 	} else {
 		panic("Stateroot and Bootstrap Id must be specified!")
 	}
@@ -109,14 +107,15 @@ func (nh *NodeHandler) AddNode(ctx *gin.Context) {
 // @Produce json
 // @Param fqdn query string true "FQDN of the hostname for staging"
 // @Param password query string true "Root password of the node"
+// @Param state query string true "State Id for bootstrapping"
 // @Header 200 {string} Token "0"
 // @Router /api/v1/node/stage [post]
 func (nh *NodeHandler) StageNode(ctx *gin.Context) {
-	ret := nh.InitForm(ctx, "fqdn", "password")
+	ret := nh.InitForm(ctx, "fqdn", "password", "state")
 	fqdn := ret.GetValues().Get("fqdn")
 	passwd := ret.GetValues().Get("password")
+	state := ret.GetValues().Get("state")
 
-	nh.cms.Bootstrap(fqdn, "root", passwd)
-
+	ret.SetPayload(nh.cms.Bootstrap(fqdn, state, "root", passwd))
 	ret.SendJSON()
 }
