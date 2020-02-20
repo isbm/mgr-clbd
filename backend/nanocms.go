@@ -10,9 +10,9 @@ import (
 	"fmt"
 	scp "github.com/bramvdbogaerde/go-scp"
 	"github.com/bramvdbogaerde/go-scp/auth"
+	"github.com/isbm/nano-cms/nanorunners"
 	"github.com/isbm/nano-cms/nanostate"
 	"github.com/isbm/nano-cms/nanostate/compiler"
-	"github.com/isbm/uyuni-ncd/runners"
 	"golang.org/x/crypto/ssh"
 	"os"
 	"os/user"
@@ -40,9 +40,9 @@ func (n *NanoCms) GetStateIndex() *nanocms_state.NanoStateIndex {
 }
 
 // RunStateSSH is to run nanostate over SSH
-func (n *NanoCms) RunStateSSH(state *nanocms_state.Nanostate, fqdns ...string) *runners.RunnerResponse {
+func (n *NanoCms) RunStateSSH(state *nanocms_state.Nanostate, fqdns ...string) *nanocms_runners.RunnerResponse {
 	logger.Debugf("Running state '%s' on %d machines", state.Id, len(fqdns))
-	shr := runners.NewSSHRunner().SetRemoteUsername("root").SetSSHHostVerification(false)
+	shr := nanocms_runners.NewSSHRunner().SetRemoteUsername("root").SetSSHHostVerification(false)
 	for _, fqdn := range fqdns {
 		shr.AddHost(fqdn)
 	}
@@ -156,7 +156,7 @@ func (n *NanoCms) StartUp() {}
 //
 // All this is achieved by installing a ncd binary and let it
 // run a nanostate.
-func (n *NanoCms) Bootstrap(fqdn string, stateid string, user string, password string) *runners.RunnerResponse {
+func (n *NanoCms) Bootstrap(fqdn string, stateid string, user string, password string) *nanocms_runners.RunnerResponse {
 	logger.Debugf("Bootstrapping node '%s'...", fqdn)
 
 	if !n.sshKeysDeployed {
