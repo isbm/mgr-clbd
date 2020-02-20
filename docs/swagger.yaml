@@ -47,6 +47,11 @@ paths:
         name: password
         required: true
         type: string
+      - description: State Id for bootstrapping
+        in: query
+        name: state
+        required: true
+        type: string
       produces:
       - application/json
       responses: {}
