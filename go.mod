@@ -13,6 +13,7 @@ require (
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/iancoleman/strcase v0.0.0-20191112232945-16388991a334
 	github.com/isbm/go-nanoconf v0.0.0-20200219130459-fc328232826c
+	github.com/isbm/nano-cms v0.0.0-20200220100446-17c22fe48ed8
 	github.com/isbm/uyuni-ncd v0.0.0-20200218225848-975e5281d54b
 	github.com/jinzhu/gorm v1.9.12
 	github.com/json-iterator/go v1.1.9 // indirect
@@ -26,11 +27,10 @@ require (
 	github.com/swaggo/gin-swagger v1.2.0
 	github.com/swaggo/swag v1.6.5
 	github.com/urfave/cli/v2 v2.1.1
-	golang.org/x/crypto v0.0.0-20200214034016-1d94cc7ab1c6
-	golang.org/x/net v0.0.0-20200202094626-16171245cfb2 // indirect
+	golang.org/x/crypto v0.0.0-20200219234226-1ad67e1f0ef4
+	golang.org/x/net v0.0.0-20200219183655-46282727080f // indirect
 	golang.org/x/sys v0.0.0-20200219091948-cb0a6d8edb6c // indirect
-	golang.org/x/tools v0.0.0-20200219054238-753a1d49df85 // indirect
-	google.golang.org/appengine v1.6.5 // indirect
+	golang.org/x/tools v0.0.0-20200220051852-2086a0a691c0 // indirect
 	gopkg.in/go-playground/validator.v9 v9.31.0 // indirect
 )
 
