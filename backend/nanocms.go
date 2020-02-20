@@ -10,8 +10,8 @@ import (
 	"fmt"
 	scp "github.com/bramvdbogaerde/go-scp"
 	"github.com/bramvdbogaerde/go-scp/auth"
-	"github.com/isbm/uyuni-ncd/nanostate"
-	"github.com/isbm/uyuni-ncd/nanostate/compiler"
+	"github.com/isbm/nano-cms/nanostate"
+	"github.com/isbm/nano-cms/nanostate/compiler"
 	"github.com/isbm/uyuni-ncd/runners"
 	"golang.org/x/crypto/ssh"
 	"os"
@@ -21,32 +21,26 @@ import (
 
 type NanoCms struct {
 	BaseBackend
-	stateindex      *nanostate.NanoStateIndex
-	bootstrapId     string
+	stateindex      *nanocms_state.NanoStateIndex
 	sshKeysDeployed bool
 }
 
 func NewNanoCmsBackend() *NanoCms {
 	cms := new(NanoCms)
-	cms.stateindex = nanostate.NewNanoStateIndex()
+	cms.stateindex = nanocms_state.NewNanoStateIndex()
 	cms.sshKeysDeployed = false
 	return cms
-}
-
-// SetBootstrapStateId sets bootstrap id
-func (n *NanoCms) SetBootstrapStateId(id string) {
-	n.bootstrapId = id
 }
 
 // GetStateIndex returns an instance of a state index.
 // XXX: This is subject to change, because nanostate API
 // are unstable, so is the indexer.
-func (n *NanoCms) GetStateIndex() *nanostate.NanoStateIndex {
+func (n *NanoCms) GetStateIndex() *nanocms_state.NanoStateIndex {
 	return n.stateindex
 }
 
 // RunStateSSH is to run nanostate over SSH
-func (n *NanoCms) RunStateSSH(state *nanostate.Nanostate, fqdns ...string) *runners.RunnerResponse {
+func (n *NanoCms) RunStateSSH(state *nanocms_state.Nanostate, fqdns ...string) *runners.RunnerResponse {
 	logger.Debugf("Running state '%s' on %d machines", state.Id, len(fqdns))
 	shr := runners.NewSSHRunner().SetRemoteUsername("root").SetSSHHostVerification(false)
 	for _, fqdn := range fqdns {
@@ -58,16 +52,16 @@ func (n *NanoCms) RunStateSSH(state *nanostate.Nanostate, fqdns ...string) *runn
 }
 
 // LoadNstFile loads a nanostate from a file path
-func (n *NanoCms) LoadNstFile(statepath string) *nanostate.Nanostate {
+func (n *NanoCms) LoadNstFile(statepath string) *nanocms_state.Nanostate {
 	// Compile nanostate
-	cpr := nstcompiler.NewNstCompiler()
+	cpr := nanocms_compiler.NewNstCompiler()
 	err := cpr.LoadFile(statepath)
 	if err != nil {
 		panic(err)
 	}
 
 	// Load compiled tree
-	nst := nanostate.NewNanostate()
+	nst := nanocms_state.NewNanostate()
 	err = nst.Load(cpr.Tree())
 	if err != nil {
 		panic(err)
@@ -162,17 +156,15 @@ func (n *NanoCms) StartUp() {}
 //
 // All this is achieved by installing a ncd binary and let it
 // run a nanostate.
-func (n *NanoCms) Bootstrap(fqdn string, user string, password string) *ClusterNode {
+func (n *NanoCms) Bootstrap(fqdn string, stateid string, user string, password string) *runners.RunnerResponse {
 	logger.Debugf("Bootstrapping node '%s'...", fqdn)
 
 	if !n.sshKeysDeployed {
 		n.sshKeysDeployed = n.SshCopyId(fqdn, user, password)
 	}
 
-	nstfile := n.GetStateIndex().GetStateById(n.bootstrapId).Path
-	logger.Debugf("Running NST file by Id '%s': %s", n.bootstrapId, nstfile)
+	nstfile := n.GetStateIndex().GetStateById(stateid).Path
+	logger.Debugf("Running NST file by Id '%s': %s", stateid, nstfile)
 
-	n.RunStateSSH(n.LoadNstFile(nstfile), fqdn)
-
-	return nil
+	return n.RunStateSSH(n.LoadNstFile(nstfile), fqdn)
 }
