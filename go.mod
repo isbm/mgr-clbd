@@ -13,8 +13,7 @@ require (
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/iancoleman/strcase v0.0.0-20191112232945-16388991a334
 	github.com/isbm/go-nanoconf v0.0.0-20200219130459-fc328232826c
-	github.com/isbm/nano-cms v0.0.0-20200220100446-17c22fe48ed8
-	github.com/isbm/uyuni-ncd v0.0.0-20200218225848-975e5281d54b
+	github.com/isbm/nano-cms v0.0.0-20200220110702-a3501d0cabb5
 	github.com/jinzhu/gorm v1.9.12
 	github.com/json-iterator/go v1.1.9 // indirect
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
@@ -33,5 +32,3 @@ require (
 	golang.org/x/tools v0.0.0-20200220051852-2086a0a691c0 // indirect
 	gopkg.in/go-playground/validator.v9 v9.31.0 // indirect
 )
-
-replace github.com/isbm/uyuni-ncd => /home/bo/work/golang/uyuni-ncd/
