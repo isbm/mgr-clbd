@@ -1,0 +1,35 @@
+
+# Bootstrapping Uyuni Server:
+#
+#		1. curl binary for arch to a location (ncd)
+#		2. curl service script
+#		3. configuration
+#		4. start service
+
+id: sle15-node-bootstrap
+description: Bootstrap a singe Uyuni Server to a cluster node
+state:
+  state-with-ncd:
+    #- ansible.system.service:
+    #    name: postgresql
+    #    state: stopped
+    #- shell:
+    #    - remove-ansible-repo: "zypper rr ansible"
+    #    - add-ansible-repo: "zypper ar http://dist.nue.suse.com/updates/SUSE/Backports/SLE-15_x86_64/standard/ ansible"
+    #    - zypper-ref: "zypper --gpg-auto-import-keys ref --force"
+    #    - install-ansible: "zypper in -y ansible"
+
+    # Snapshot the database
+    - ansible.system.service:
+        name: postgresql
+        state: stopped
+
+    - shell:
+      - create-pgdata-shelf: mkdir /var/lib/pgsql/.clbd
+      - chmod-pgdata-shelf: chmod 0700 /var/lib/pgsql/.clbd
+      - copy-pgdata: cp -r /var/lib/pgsql/data /var/lib/pgsql/.clbd/data
+
+    - ansible.system.service:
+        name: postgresql
+        state: started
+
