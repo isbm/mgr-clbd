@@ -23,6 +23,7 @@ type NanoCms struct {
 	BaseBackend
 	stateindex      *nanocms_state.NanoStateIndex
 	sshKeysDeployed bool
+	staticdataRoot  string
 }
 
 func NewNanoCmsBackend() *NanoCms {
@@ -39,10 +40,20 @@ func (n *NanoCms) GetStateIndex() *nanocms_state.NanoStateIndex {
 	return n.stateindex
 }
 
+// SetStaticDataRoot sets configuration of the static data
+func (n *NanoCms) SetStaticDataRoot(root string) *NanoCms {
+	n.staticdataRoot = root
+	return n
+}
+
 // RunStateSSH is to run nanostate over SSH
 func (n *NanoCms) RunStateSSH(state *nanocms_state.Nanostate, fqdns ...string) *nanocms_runners.RunnerResponse {
 	logger.Debugf("Running state '%s' on %d machines", state.Id, len(fqdns))
-	shr := nanocms_runners.NewSSHRunner().SetRemoteUsername("root").SetSSHHostVerification(false)
+	shr := nanocms_runners.NewSSHRunner().
+		SetPermanentMode("/opt/nanocms").
+		SetStaticDataRoot(n.staticdataRoot).
+		SetRemoteUsername("root").
+		SetSSHHostVerification(false)
 	for _, fqdn := range fqdns {
 		shr.AddHost(fqdn)
 	}
