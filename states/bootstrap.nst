@@ -1,6 +1,0 @@
-id: node-bootstrap
-description: Bootstrap a singe Uyuni Server to a cluster node
-state:
-  install-ncd:
-    - shell:
-        - curl-binary: "touch /tmp/worked"
