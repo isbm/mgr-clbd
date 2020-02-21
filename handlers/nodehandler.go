@@ -35,6 +35,7 @@ func (nh *NodeHandler) Backend() backend.Backend {
 	stateroot := nh.config.Find("general:state").String("root", "")
 	if stateroot != "" {
 		nh.cms.GetStateIndex().AddStateRoot(stateroot).Index()
+		nh.cms.SetStaticDataRoot(nh.config.Find("general").String("static-root", ""))
 	} else {
 		panic("Stateroot and Bootstrap Id must be specified!")
 	}
