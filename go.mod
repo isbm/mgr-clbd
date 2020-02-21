@@ -6,14 +6,16 @@ require (
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
 	github.com/antonfisher/nested-logrus-formatter v1.0.3
 	github.com/bramvdbogaerde/go-scp v0.0.0-20200119201711-987556b8bdd7
+	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
 	github.com/gin-gonic/gin v1.5.0
 	github.com/go-openapi/spec v0.19.6 // indirect
 	github.com/go-openapi/swag v0.19.7 // indirect
 	github.com/go-playground/universal-translator v0.17.0 // indirect
 	github.com/go-sql-driver/mysql v1.5.0
+	github.com/golang/protobuf v1.3.3 // indirect
 	github.com/iancoleman/strcase v0.0.0-20191112232945-16388991a334
 	github.com/isbm/go-nanoconf v0.0.0-20200219130459-fc328232826c
-	github.com/isbm/nano-cms v0.0.0-20200220152856-016a0da1cc12
+	github.com/isbm/nano-cms v0.0.0-20200221152640-220f54ddf329
 	github.com/jinzhu/gorm v1.9.12
 	github.com/json-iterator/go v1.1.9 // indirect
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
@@ -29,7 +31,7 @@ require (
 	golang.org/x/crypto v0.0.0-20200220183623-bac4c82f6975
 	golang.org/x/net v0.0.0-20200219183655-46282727080f // indirect
 	golang.org/x/sys v0.0.0-20200219091948-cb0a6d8edb6c // indirect
-	golang.org/x/tools v0.0.0-20200220224806-8a925fa4c0df // indirect
+	golang.org/x/tools v0.0.0-20200221152158-fe62aff31966 // indirect
 	gopkg.in/go-playground/validator.v9 v9.31.0 // indirect
 )
 
