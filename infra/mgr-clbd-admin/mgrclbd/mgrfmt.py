@@ -1,6 +1,7 @@
 """
 API formatters.
 """
+import json
 
 class OutputFormatter:
     """
@@ -15,11 +16,4 @@ class OutputFormatter:
         :return: formatter string for the output
         :rtype: str
         """
-        out = []
-        if jsondata.get("errcode", 0) != 200:
-            out.append("Error: " + jsondata.get("error", ""))
-        else:
-            out.append("Info: " + jsondata.get("msg", "N/A") or "")
-            out.append(str(jsondata.get("data", {})))
-
-        return "\n".join(out)
+        return json.dumps(jsondata, indent="  ")
