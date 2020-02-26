@@ -2,6 +2,7 @@ package clbd
 
 import (
 	"fmt"
+	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/isbm/mgr-clbd/dbx"
 	_ "github.com/isbm/mgr-clbd/docs"
@@ -109,6 +110,17 @@ func (api *APIEndPoint) GinLogger() gin.HandlerFunc {
 			api.logger.Infoln(msg)
 		}
 	}
+}
+
+// SetStaticDirectoryRoot sets static directory to be served.
+// Usually it is a fileserver for everything: binaries, states etc.
+// It is available as "/pub".
+func (api *APIEndPoint) SetStaticDirectoryRoot(root string) *APIEndPoint {
+	if root != "" {
+		api.server.Use(static.Serve("/pub", static.LocalFile(root, true)))
+	}
+
+	return api
 }
 
 func (api *APIEndPoint) SetPort(port int) *APIEndPoint {

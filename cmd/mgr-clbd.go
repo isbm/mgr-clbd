@@ -39,7 +39,8 @@ func run(ctx *cli.Context) error {
 		AddHandler(hdl.NewPingHandler("cluster")).
 		AddHandler(nodehandler).
 		AddHandler(hdl.NewSystemsHandler("systems")).
-		AddHandler(hdl.NewZoneHandler("zones"))
+		AddHandler(hdl.NewZoneHandler("zones")).
+		SetStaticDirectoryRoot(cfg.Find("general").String("static-root", ""))
 
 	fmt.Println("For Swagger: http://localhost:9080/swagger/index.html")
 
