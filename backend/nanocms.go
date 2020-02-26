@@ -99,6 +99,22 @@ func (n *NanoCms) SshCopyId(fqdn string, username string, password string) bool 
 		return true
 	}
 	logger.Debugf("No SSH key-based connection yet at %s for %s, deploying...", fqdn, username)
+
+	// Pre-create .ssh directory, if none is there, otherwise key copy will fail and nothing will work
+	// This SSH shell is only over password auth, so no RSA keypair is passed
+	kcnt := nanocms_runners.NewSshShell("").
+		SetFQDN(fqdn).
+		SetHostVerification(false).
+		SetRemoteUsername(username).
+		SetRemotePassword(password).Connect()
+	kss := kcnt.NewSession()
+	_, kerr := kss.Run("mkdir -p .ssh")
+	kcnt.Disconnect()
+	if kerr != nil {
+		logger.Errorln("Unable to pre-create .ssh directory, so the id_rsa.pub won't be copied properly. Exiting.")
+		return false
+	}
+
 	// No key yet, copy & add
 	conf, _ = auth.PasswordKey(username, password, ssh.InsecureIgnoreHostKey())
 	cnt = scp.NewClient(fqdn+":22", &conf)
