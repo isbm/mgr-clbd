@@ -171,6 +171,7 @@ func (n *NanoCms) Bootstrap(fqdn string, stateid string, user string, password s
 	logger.Debugf("Bootstrapping node '%s'...", fqdn)
 
 	if !n.sshKeysDeployed {
+		logger.Debugf("Copying SSH id as %s", user)
 		n.sshKeysDeployed = n.SshCopyId(fqdn, user, password)
 	}
 
