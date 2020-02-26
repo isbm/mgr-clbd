@@ -100,7 +100,6 @@ func (n *NanoCms) SshCopyId(fqdn string, username string, password string) bool 
 	}
 	logger.Debugf("No SSH key-based connection yet at %s for %s, deploying...", fqdn, username)
 	// No key yet, copy & add
-	tempkey := path.Join("/root", ".ssh", fqdn+".pub")
 	conf, _ = auth.PasswordKey(username, password, ssh.InsecureIgnoreHostKey())
 	cnt = scp.NewClient(fqdn+":22", &conf)
 	err = cnt.Connect()
@@ -119,6 +118,7 @@ func (n *NanoCms) SshCopyId(fqdn string, username string, password string) bool 
 	defer fh.Close()
 	defer cnt.Close()
 
+	tempkey := path.Join("/root", ".ssh", fqdn+".pub")
 	err = cnt.CopyFile(fh, tempkey, "0600")
 	if err != nil {
 		logger.Errorln("Error copying pub", err.Error())
