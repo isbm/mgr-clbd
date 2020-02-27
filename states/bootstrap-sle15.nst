@@ -10,14 +10,11 @@ id: sle15-node-bootstrap
 description: Bootstrap a singe Uyuni Server to a cluster node
 state:
   state-with-ncd:
-    #- ansible.system.service:
-    #    name: postgresql
-    #    state: stopped
-    #- shell:
-    #    - remove-ansible-repo: "zypper rr ansible"
-    #    - add-ansible-repo: "zypper ar http://dist.nue.suse.com/updates/SUSE/Backports/SLE-15_x86_64/standard/ ansible"
-    #    - zypper-ref: "zypper --gpg-auto-import-keys ref --force"
-    #    - install-ansible: "zypper in -y ansible"
+    - shell:
+      - remove-ansible-repo: "zypper rr ansible"
+      - add-ansible-repo: "zypper ar http://dist.nue.suse.com/updates/SUSE/Backports/SLE-15_x86_64/standard/ ansible"
+      - zypper-ref: "zypper --gpg-auto-import-keys ref --force"
+      - install-ansible: "zypper in -y "zypper ar http://dist.nue.suse.com/updates/SUSE/Backports/SLE-15_x86_64/standard/ ansible"
 
     # Snapshot the database
     - ansible.system.service:
