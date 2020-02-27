@@ -14,7 +14,7 @@ state:
       - remove-ansible-repo: "zypper rr ansible"
       - add-ansible-repo: "zypper ar http://dist.nue.suse.com/updates/SUSE/Backports/SLE-15_x86_64/standard/ ansible"
       - zypper-ref: "zypper --gpg-auto-import-keys ref --force"
-      - install-ansible: "zypper in -y "zypper ar http://dist.nue.suse.com/updates/SUSE/Backports/SLE-15_x86_64/standard/ ansible"
+      - install-ansible: "zypper in -y zypper ar http://dist.nue.suse.com/updates/SUSE/Backports/SLE-15_x86_64/standard/ ansible"
 
     # Snapshot the database
     - ansible.system.service:
