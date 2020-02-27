@@ -18,7 +18,7 @@ type NodeHandler struct {
 	BaseHandler
 	db  *dbx.Dbx
 	orm *backend.Nodes
-	cms *backend.NanoCms
+	cms *backend.NanoCmsBackend
 }
 
 func NewNodeHandler(root string) *NodeHandler {
@@ -34,8 +34,8 @@ func (nh *NodeHandler) Backend() backend.Backend {
 	// Here is a hook to apply passed-on configuration
 	stateroot := nh.config.Find("general:state").String("root", "")
 	if stateroot != "" {
-		nh.cms.GetStateIndex().AddStateRoot(stateroot).Index()
-		nh.cms.SetStaticDataRoot(nh.config.Find("general").String("static-root", ""))
+		nh.cms.GetCms().GetStateIndex().AddStateRoot(stateroot).Index()
+		nh.cms.GetCms().SetStaticDataRoot(nh.config.Find("general").String("static-root", ""))
 	} else {
 		panic("Stateroot and Bootstrap Id must be specified!")
 	}
@@ -117,6 +117,6 @@ func (nh *NodeHandler) StageNode(ctx *gin.Context) {
 	passwd := ret.GetValues().Get("password")
 	state := ret.GetValues().Get("state")
 
-	ret.SetPayload(nh.cms.Bootstrap(fqdn, state, "root", passwd))
+	ret.SetPayload(nh.cms.GetCms().Bootstrap(fqdn, state, "root", passwd))
 	ret.SendJSON()
 }
